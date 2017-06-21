@@ -5,7 +5,11 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup as Soup
 
 
-class TestMetacriticScrape(unittest.TestCase):
+class TestMetacriticParse(unittest.TestCase):
+    """
+    Test the Album class by parsing static html and making sure the values
+    are what we expect
+    """
     def setUp(self):
         self.albums = metacritic.parse_albums_from_metacritic_html(
             response_text)
@@ -84,12 +88,29 @@ class TestMetacriticScrape(unittest.TestCase):
         self.assertTrue(len(one_month_old_albums) < len(self.albums))
 
 
+class TestMetacriticScraper(unittest.TestCase):
+    """
+    Test the scraping of the realtime metacritic website
+    """
+    def setUp(self):
+        self.scraper = metacritic.Scraper()
+        self.html = self.scraper.scrape_html()
+
+    def test_scraper_returns_200_albums(self):
+        """
+        Metacritic displays 200 albums by default on their page
+        """
+        albums = metacritic.parse_albums_from_metacritic_html(self.html)
+        self.assertEqual(len(albums), 200)
+
+
 # read local copy of metacritic site from June 21, 2017 contains 200 albums
 response_text = ""
 filepath = os.path.join(os.path.dirname(__file__), "metacritic_sample.html")
 with open(filepath, encoding="utf8") as f:
     response_text = f.read()
 
+# metacritic html representations of albums for testing
 fake_product_html = """
 <li>
   <div class="product_score">{rating}</div>
