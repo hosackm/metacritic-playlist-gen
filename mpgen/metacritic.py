@@ -54,6 +54,14 @@ class Album:
         self.rating = rating
         self.title = title
 
+    def __repr__(self):
+        return ("Album(date='{date}', artist='{artist}', "
+                "title='{title}', rating='{rating}')").format(
+                    date=self.date,
+                    artist=self.artist,
+                    title=self.title,
+                    rating=self.rating)
+
     @classmethod
     def from_list_item(cls, li):
         """
@@ -121,3 +129,10 @@ class MetaTitle(str):
 
 class MetaArtist(str):
     pass
+
+
+if __name__ == "__main__":
+    scraper = Scraper()
+    albums = parse_albums_from_metacritic_html(scraper.scrape_html())
+    print(albums[0])
+    print(albums[-1])
