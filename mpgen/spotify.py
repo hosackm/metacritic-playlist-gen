@@ -3,6 +3,7 @@ import json
 import requests
 import collections
 from base64 import b64encode as b64enc
+from urllib.parse import quote_plus as qp
 
 
 class Auth:
@@ -62,7 +63,7 @@ class Spotify:
         self.auth = Auth()
         self.token = self.auth.get_token()
 
-    def get_playlist_tracks(self, playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
+    def get_tracks_from_playlist(self, playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
         """
         Returns a list of SpotifyTrack objects for the specified playlist
         """
@@ -84,15 +85,36 @@ class Spotify:
                 for track
                 in items]
 
+    def add_tracks_to_playlist(self,
+                               tracks,
+                               playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
+        """
+        Adds the given SpotifyTracks to the playlist_id
+        """
+        if not isinstance(tracks, collections.Iterable):
+            tracks = [tracks]
+
+        data = {
+            "uris": ["spotify:track:{}".format(track.track_id)
+                     for track in tracks]
+        }
+
+        url = "{}users/hosackm/playlists/{}/tracks".format(self.urlbase,
+                                                           playlist_id)
+
+        resp = requests.post(url, headers=self._get_header(),
+                             data=json.dumps(data))
+
+        if resp.status_code != 201:
+            raise Exception("Unable to add tracks to the playlist {}".format(
+                resp.text))
+
     def delete_tracks_from_playlist(self,
-                                    playlist_id="65RYrUbKJgX0eJHBIZ14Fe",
-                                    tracks=None):
+                                    tracks,
+                                    playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
         """
         Removes the given SpotifyTracks from the playlist_id
         """
-        if tracks is None:
-            return
-
         if not isinstance(tracks, collections.Iterable):
             tracks = [tracks]
 
@@ -111,11 +133,66 @@ class Spotify:
         if resp.status_code != 200:
             raise Exception("Unable to delete tracks")
 
+    def search_for_album(self, album_query_string):
+        """
+        Search for an album by album title and return first result
+        """
+        q = "q=album:{}&type=album".format(qp(album_query_string))
+        url = "https://api.spotify.com/v1/search?{}".format(q)
+
+        resp = requests.get(url, headers=self._get_header())
+        if resp.status_code != 200:
+            raise Exception("Search request to API failed{}".format(resp.text))
+
+        try:
+            album_json = json.loads(resp.text)["albums"]["items"][0]
+        except:
+            return None
+
+        return SpotifyAlbum.from_album_json(album_json)
+
+    def get_tracks_from_album(self, album_id):
+        """
+        Return a SpotifyTrack for every track in album_id
+        """
+        url = "https://api.spotify.com/v1/albums/{}/tracks".format(album_id)
+
+        resp = requests.get(url, headers=self._get_header())
+        if resp.status_code != 200:
+            raise Exception(
+                "API Failed to retrieve tracks for album. {}".format(
+                    resp.text))
+
+        items = json.loads(resp.text).get("items")
+
+        return [SpotifyTrack.from_track_json(track)
+                for track
+                in items]
+
     def _get_header(self):
         """
         Returns the authorization header expected by Spotify's API
         """
         return {"Authorization": "Bearer {}".format(self.token)}
+
+
+class SpotifyAlbum:
+    def __init__(self, artist, title, album_id):
+        self.artist = artist
+        self.title = title
+        self.album_id = album_id
+
+    def __repr__(self):
+        return ("SpotifyAlbum(artist='{artist}', title='{title}'"
+                ", id='{id}')").format(
+                    artist=self.artist, title=self.title, id=self.album_id
+                )
+
+    @classmethod
+    def from_album_json(cls, album):
+        return cls(artist=album["artists"][0]["name"],
+                   title=album["name"],
+                   album_id=album["uri"])
 
 
 class SpotifyTrack:
@@ -133,10 +210,9 @@ class SpotifyTrack:
     @classmethod
     def from_track_json(cls, track):
         """
-        Convert a JSON 'track' object from the Spotify API into a  SpotifyTrack
+        Convert a JSON 'track' object from the Spotify API into a SpotifyTrack
         """
-        return cls(
-            artist=track.get("artists")[0].get("name"),
-            track_id=track.get("id"),
-            title=track.get("name")
-            )
+        return cls(artist=track.get("artists")[0].get("name"),
+                   track_id=track.get("id"),
+                   title=track.get("name")
+                   )
