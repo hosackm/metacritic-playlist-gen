@@ -3,21 +3,6 @@ from datetime import datetime
 from bs4 import BeautifulSoup as Soup
 
 
-def parse_albums_from_metacritic_html(html):
-    """
-    Take html from metacritic and return a list of parsed albums from it
-
-    The products are expected to be in an html tag <ol> with a class
-    of list_products. Each product is in an <li> tag with a class of product
-    """
-    soup = Soup(html, "html.parser")
-    soup.find("ol", {"class": "list_products"})
-
-    return [Album.from_list_item(list_item)
-            for list_item
-            in soup.findAll("li", {"class": "product"})]
-
-
 class Scraper:
     """
     Scrapes the most recent Metacritic New Album Realeses page
@@ -26,18 +11,30 @@ class Scraper:
         self.url = ("http://www.metacritic.com/browse/"
                     "albums/release-date/new-releases/date")
 
-    def scrape_html(self):
+    def scrape_html(self, cached_html=None):
         """
         Make a request for the most recent Metacritic New Album Releases page
 
         Return the html text or raise and Exception if the request failed
         """
-        resp = requests.get(self.url, headers={"User-Agent": "MPGEN-Scraper"})
+        if cached_html is None:
+            resp = requests.get(self.url,
+                                headers={"User-Agent": "MPGEN-Scraper"})
 
-        if resp.status_code != 200:
-            raise Exception("Unable to scrape {url}".format(url=self.url))
+            if resp.status_code != 200:
+                raise Exception("Unable to scrape {url}".format(url=self.url))
 
-        return resp.text
+            html = resp.text
+        else:
+            html = cached_html
+
+        # Take html from metacritic and return a list of parsed albums from it
+        soup = Soup(html, "html.parser")
+        soup.find("ol", {"class": "list_products"})
+
+        return [Album.from_list_item(list_item)
+                for list_item
+                in soup.findAll("li", {"class": "product"})]
 
 
 class Album:
@@ -133,6 +130,6 @@ class MetaArtist(str):
 
 if __name__ == "__main__":
     scraper = Scraper()
-    albums = parse_albums_from_metacritic_html(scraper.scrape_html())
+    albums = scraper.scrape_html()
     print(albums[0])
     print(albums[-1])

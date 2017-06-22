@@ -11,8 +11,8 @@ class TestMetacriticParse(unittest.TestCase):
     are what we expect
     """
     def setUp(self):
-        self.albums = metacritic.parse_albums_from_metacritic_html(
-            response_text)
+        self.scraper = metacritic.Scraper()
+        self.albums = self.scraper.scrape_html(cached_html=response_text)
 
     def test_first_and_last_parsed_correctly(self):
         """
@@ -87,22 +87,8 @@ class TestMetacriticParse(unittest.TestCase):
 
         self.assertTrue(len(one_month_old_albums) < len(self.albums))
 
-
-class TestMetacriticScraper(unittest.TestCase):
-    """
-    Test the scraping of the realtime metacritic website
-    """
-    def setUp(self):
-        self.scraper = metacritic.Scraper()
-        self.html = self.scraper.scrape_html()
-
     def test_scraper_returns_200_albums(self):
-        """
-        Metacritic displays 200 albums by default on their page
-        """
-        albums = metacritic.parse_albums_from_metacritic_html(self.html)
-        self.assertEqual(len(albums), 200)
-
+        self.assertEqual(len(self.albums), 200)
 
 # read local copy of metacritic site from June 21, 2017 contains 200 albums
 response_text = ""
