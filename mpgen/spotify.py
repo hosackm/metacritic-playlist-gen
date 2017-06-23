@@ -63,6 +63,10 @@ class Spotify:
         self.auth = Auth()
         self.token = self.auth.get_token()
 
+    def clear_playlist(self, playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
+        tracks = self.get_tracks_from_playlist(playlist_id)
+        self.delete_tracks_from_playlist(tracks)
+
     def get_tracks_from_playlist(self, playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
         """
         Returns a list of SpotifyTrack objects for the specified playlist
@@ -192,7 +196,7 @@ class SpotifyAlbum:
     def from_album_json(cls, album):
         return cls(artist=album["artists"][0]["name"],
                    title=album["name"],
-                   album_id=album["uri"])
+                   album_id=album["uri"].split(":")[-1])  # strip spotify:album
 
 
 class SpotifyTrack:
