@@ -1,16 +1,19 @@
+import argparse
+import textwrap
 from datetime import datetime, timedelta
 from mpgen.spotify import Spotify
 from mpgen.metacritic import Scraper
 
 
-def run():
+def run(minimum_rating=80, cutoff_date=7):
     today = datetime.today()
-    week_ago = today - timedelta(days=7)
+    week_ago = today - timedelta(days=cutoff_date)
 
     # get recent albums that have a rating higher than 80
     recent_albums = [a
                      for a in Scraper().scrape_html()
-                     if week_ago <= a.date <= today and a.rating >= 80]
+                     if week_ago <= a.date <= today
+                     and a.rating >= minimum_rating]
 
     # create Spotify API instance
     api = Spotify()
@@ -46,4 +49,20 @@ Last Updated {}\
     api.update_playlist_description(description)
 
 if __name__ == "__main__":
-    run()
+    desc = """\
+        This script will scrape Metacritic's New Releases page and parse the \
+        album information.  It will then take the albums that have a minimum \
+        rating and were released after a cutoff date and add them to a \
+        Spotify playlist.\
+        """
+    parser = argparse.ArgumentParser(description=textwrap.dedent(desc))
+    parser.add_argument("-d", "--days-ago", default=7, metavar="DAYS",
+                        help="Only albums newer than this many days ago "
+                             "will be added to the playlist")
+    parser.add_argument("-r", "--rating", default=80,
+                        metavar="RATING",
+                        help="Only albums with a higher rating than this "
+                             "number will be added to the playlist")
+
+    args = parser.parse_args()
+    run(args.rating, args.days_ago)
