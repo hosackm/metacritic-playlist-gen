@@ -20,17 +20,30 @@ def run():
 
     # search for each album and add it's tracks to playlist
     for album in recent_albums:
-        hit = api.search_for_album(album.title)
+        hit = api.search_for_album(" ".join((album.title, album.artist)))
         if hit is not None:
             # get the tracks for the album
-            print(album.artist, album.title)
-            print(hit.album_id)
             tracks = api.get_tracks_from_album(hit.album_id)
             # add the tracks to the playlist
             api.add_tracks_to_playlist(tracks)
+            # notify added tracks
+            print("Added {n} tracks from {album} by {artist}".format
+                  (n=len(tracks),
+                   album=album.title,
+                   artist=album.artist))
 
-            print("Added {n} tracks from {album}".format(n=len(tracks),
-                                                         album=album.title))
+    description = """\
+This playlist was created using a script written by Matt Hosack.  The new \
+release page from metacritic.com was scraped and albums scoring higher than \
+80 were added to this playlist.
+
+See github.com/hosackm/metacritic-playlist-gen for more info.
+
+Last Updated {}\
+""".format(datetime.strftime(datetime.today(), "%b %d %Y"))
+
+    # update playlist description to tell that things worked
+    api.update_playlist_description(description)
 
 if __name__ == "__main__":
     run()
