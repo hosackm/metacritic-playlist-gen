@@ -2,6 +2,7 @@ import os
 import json
 import requests
 import collections
+from fuzzywuzzy import fuzz
 from base64 import b64encode as b64enc
 from urllib.parse import quote_plus as qp
 
@@ -137,6 +138,24 @@ class Spotify:
         if resp.status_code != 200:
             raise Exception("Unable to delete tracks")
 
+    def update_playlist_description(self,
+                                    description,
+                                    playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
+        """
+        Update the text description diplayed on the page when viewing a
+        playlist in Spotify's web player
+        """
+        url = ("https://api.spotify.com/v1/users/"
+               "{}/playlists/{}".format("hosackm", playlist_id))
+        header = self._get_header()
+        header["Content-Type"] = "application/json"
+        data = json.dumps({"description": description})
+
+        resp = requests.put(url, headers=header, data=data)
+        if resp.status_code != 200:
+            raise Exception("Unable to update playlist description."
+                            " {}".format(resp.text))
+
     def search_for_album(self, album_query_string):
         """
         Search for an album by album title and return first result
@@ -149,11 +168,17 @@ class Spotify:
             raise Exception("Search request to API failed{}".format(resp.text))
 
         try:
-            album_json = json.loads(resp.text)["albums"]["items"][0]
+            albums_json = json.loads(resp.text)["albums"]["items"]
         except:
             return None
 
-        return SpotifyAlbum.from_album_json(album_json)
+        # ToDo: fuzzy find the correct album that is not a singles album
+        album_match = self._fuzzy_find_album(album_query_string, albums_json)
+
+        if album_match:
+            return SpotifyAlbum.from_album_json(album_match)
+
+        return None
 
     def get_tracks_from_album(self, album_id):
         """
@@ -179,6 +204,38 @@ class Spotify:
         """
         return {"Authorization": "Bearer {}".format(self.token)}
 
+    def _fuzzy_find_album(self, match_string, albums):
+        """
+        Find a matching album given a list of search results from Spotify.
+
+        The album should not be a single and should also fuzzy match the artist
+        and title  within a certain threshold
+        """
+        # filter out single albums
+        non_singles = []
+        for album in albums:
+            album_id = album["uri"].split(":")[-1]
+            if len(self.get_tracks_from_album(album_id)) > 1:
+                non_singles.append(album)
+
+        # zip album json and the matching string from the spotify search result
+        json_and_album_title_pairs = [
+            (a, a["name"] + " " + a["artists"][0]["name"])
+            for a in non_singles]
+
+        # do fuzzy string matching on artist and album title
+        best_match = (None, 0)
+        for album, album_and_title in json_and_album_title_pairs:
+            ratio = fuzz.token_set_ratio(match_string, album_and_title)
+            if ratio > best_match[1]:
+                best_match = (album, ratio)
+
+        # if match ratio is above 90% confidence return the album
+        if best_match[1] > 90:
+            return best_match[0]
+        # otherwise we couldn't find a good match for the album
+        return None
+
 
 class SpotifyAlbum:
     def __init__(self, artist, title, album_id):
@@ -189,8 +246,7 @@ class SpotifyAlbum:
     def __repr__(self):
         return ("SpotifyAlbum(artist='{artist}', title='{title}'"
                 ", id='{id}')").format(
-                    artist=self.artist, title=self.title, id=self.album_id
-                )
+                    artist=self.artist, title=self.title, id=self.album_id)
 
     @classmethod
     def from_album_json(cls, album):
@@ -208,8 +264,7 @@ class SpotifyTrack:
     def __repr__(self):
         return ("SpotifyTrack(artist='{artist}', title='{title}'"
                 ", id='{id}')").format(
-                    artist=self.artist, title=self.title, id=self.track_id
-                )
+                    artist=self.artist, title=self.title, id=self.track_id)
 
     @classmethod
     def from_track_json(cls, track):
