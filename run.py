@@ -6,6 +6,11 @@ from mpgen.metacritic import Scraper
 
 
 def run(minimum_rating=80, cutoff_date=7):
+    print(ascii_art_short)
+    print()
+    print("Searching for albums less than {0} days old that scored "
+          "{1} or higher on Metacritic".format(cutoff_date, minimum_rating))
+
     today = datetime.today()
     week_ago = today - timedelta(days=cutoff_date)
 
@@ -37,16 +42,30 @@ def run(minimum_rating=80, cutoff_date=7):
 
     description = """\
 This playlist was created using a script written by Matt Hosack.  The new \
-release page from metacritic.com was scraped and albums scoring higher than \
-80 were added to this playlist.
+release page from metacritic.com was scraped and albums realeased more
+recently than {0} days ago that scored higher than {1} were \
+added to this playlist.
 
 See github.com/hosackm/metacritic-playlist-gen for more info.
 
-Last Updated {}\
-""".format(datetime.strftime(datetime.today(), "%b %d %Y"))
+Last Updated {2}\
+""".format(cutoff_date,
+           minimum_rating,
+           datetime.strftime(datetime.today(), "%b %d %Y"))
 
     # update playlist description to tell that things worked
     api.update_playlist_description(description)
+
+version = "0.0.1"
+ascii_art_short = """\
+   _____ __________  ________
+  /     \\\\______   \/  _____/  ____   ____
+ /  \ /  \|     ___/   \  ____/ __ \ /    \\
+/    Y    \    |   \    \_\  \  ___/|   |  \\
+\____|__  /____|    \______  /\___  >___|  /
+        \/                 \/     \/     \/
+version {version}\
+""".format(version=version)
 
 if __name__ == "__main__":
     desc = """\
