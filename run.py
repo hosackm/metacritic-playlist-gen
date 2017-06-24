@@ -24,7 +24,14 @@ def run(minimum_rating=80, cutoff_date=7):
     api = Spotify()
 
     # clear playlist
-    api.clear_playlist()
+    removed = api.clear_playlist()
+    for t in removed:
+        try:
+            print("Removed {title} by {artist}".format(title=t.title.encode("utf8").decode("utf8"),
+                                                       artist=t.artist))
+        except UnicodeEncodeError:  # some Spotify unicode characters don't
+                                    # play nice with stdout
+            print("Removed a track by {artist}".format(artist=t.artist))
 
     # search for each album and add it's tracks to playlist
     for album in recent_albums:
