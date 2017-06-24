@@ -60,20 +60,29 @@ class Auth:
 class Spotify:
     urlbase = "https://api.spotify.com/v1/"
 
-    def __init__(self):
+    def __init__(self,
+                 user_id="hosackm",
+                 playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
         self.auth = Auth()
         self.token = self.auth.get_token()
+        self.user_id = user_id
+        self.playlist_id = playlist_id
 
-    def clear_playlist(self, playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
-        tracks = self.get_tracks_from_playlist(playlist_id)
+    def clear_playlist(self):
+        """
+        Removes all tracks from the playlist
+        """
+        tracks = self.get_tracks_from_playlist()
         self.delete_tracks_from_playlist(tracks)
 
-    def get_tracks_from_playlist(self, playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
+        return tracks
+
+    def get_tracks_from_playlist(self):
         """
         Returns a list of SpotifyTrack objects for the specified playlist
         """
         url = "{}users/hosackm/playlists/{}/tracks".format(
-            self.urlbase, playlist_id)
+            self.urlbase, self.playlist_id)
 
         query = "?fields=items(track(name, id, artists(name)))"
 
@@ -90,9 +99,7 @@ class Spotify:
                 for track
                 in items]
 
-    def add_tracks_to_playlist(self,
-                               tracks,
-                               playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
+    def add_tracks_to_playlist(self, tracks):
         """
         Adds the given SpotifyTracks to the playlist_id
         """
@@ -105,7 +112,7 @@ class Spotify:
         }
 
         url = "{}users/hosackm/playlists/{}/tracks".format(self.urlbase,
-                                                           playlist_id)
+                                                           self.playlist_id)
 
         resp = requests.post(url, headers=self._get_header(),
                              data=json.dumps(data))
@@ -114,9 +121,7 @@ class Spotify:
             raise Exception("Unable to add tracks to the playlist {}".format(
                 resp.text))
 
-    def delete_tracks_from_playlist(self,
-                                    tracks,
-                                    playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
+    def delete_tracks_from_playlist(self, tracks):
         """
         Removes the given SpotifyTracks from the playlist_id
         """
@@ -131,22 +136,20 @@ class Spotify:
         }
 
         url = "{}users/hosackm/playlists/{}/tracks".format(self.urlbase,
-                                                           playlist_id)
+                                                           self.playlist_id)
         resp = requests.delete(url,
                                headers=self._get_header(),
                                data=json.dumps(data))
         if resp.status_code != 200:
             raise Exception("Unable to delete tracks")
 
-    def update_playlist_description(self,
-                                    description,
-                                    playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
+    def update_playlist_description(self, description):
         """
         Update the text description diplayed on the page when viewing a
         playlist in Spotify's web player
         """
         url = ("https://api.spotify.com/v1/users/"
-               "{}/playlists/{}".format("hosackm", playlist_id))
+               "{}/playlists/{}".format("hosackm", self.playlist_id))
         header = self._get_header()
         header["Content-Type"] = "application/json"
         data = json.dumps({"description": description})
