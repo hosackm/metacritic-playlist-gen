@@ -4,12 +4,26 @@ from datetime import datetime, timedelta
 from mpgen.spotify import Spotify
 from mpgen.metacritic import Scraper
 
+import logging
+
+import sys
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s "
+                              "- %(message)s")
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+
 
 def run(minimum_rating=80, cutoff_date=7):
-    print(ascii_art_short)
-    print()
-    print("Searching for albums less than {0} days old that scored "
-          "{1} or higher on Metacritic".format(cutoff_date, minimum_rating))
+    logger.info(ascii_art_short)
+    logger.info("Searching for albums less than {0} days old that scored "
+                "{1} or higher on Metacritic".format(
+                    cutoff_date, minimum_rating))
 
     today = datetime.today()
     week_ago = today - timedelta(days=cutoff_date)
@@ -27,11 +41,12 @@ def run(minimum_rating=80, cutoff_date=7):
     removed = api.clear_playlist()
     for t in removed:
         try:
-            print("Removed {title} by {artist}".format(title=t.title.encode("utf8").decode("utf8"),
-                                                       artist=t.artist))
+            logger.info("Removed {title} by {artist}".format(
+                title=t.title,
+                artist=t.artist))
         except UnicodeEncodeError:  # some Spotify unicode characters don't
                                     # play nice with stdout
-            print("Removed a track by {artist}".format(artist=t.artist))
+            logger.info("Removed a track by {artist}".format(artist=t.artist))
 
     # search for each album and add it's tracks to playlist
     for album in recent_albums:
@@ -42,10 +57,10 @@ def run(minimum_rating=80, cutoff_date=7):
             # add the tracks to the playlist
             api.add_tracks_to_playlist(tracks)
             # notify added tracks
-            print("Added {n} tracks from {album} by {artist}".format
-                  (n=len(tracks),
-                   album=album.title,
-                   artist=album.artist))
+            logger.info("Added {n} tracks from {album} by {artist}".format
+                        (n=len(tracks),
+                         album=album.title,
+                         artist=album.artist))
 
     description = """\
 This playlist was created using a script written by Matt Hosack.  The new \
@@ -64,7 +79,7 @@ Last Updated {2}\
     api.update_playlist_description(description)
 
 version = "0.0.1"
-ascii_art_short = """\
+ascii_art_short = """\n\
    _____ __________  ________
   /     \\\\______   \/  _____/  ____   ____
  /  \ /  \|     ___/   \  ____/ __ \ /    \\
