@@ -1,5 +1,7 @@
+import platform
 import shutil
 import glob
+import sys
 import os
 
 
@@ -41,7 +43,13 @@ def main():
         copy_file_or_dir(f, os.path.join(tmpdir, "mpgen"))
 
     # copy packages
-    for f in glob.glob("venv/Lib/site-packages/*"):
+    if "Windows" in platform.platform():
+        packages_glob = "venv/Lib/site-packages/*"
+    else:
+        mj, mn = sys.version_info[:2]
+        packages_glob = "venv/lib/python{0}.{1}/site-packages/*".format(mj, mn)
+
+    for f in glob.glob(packages_glob):
         copy_file_or_dir(f, tmpdir)
 
     # copy main module
