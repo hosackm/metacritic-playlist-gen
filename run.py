@@ -50,17 +50,21 @@ def run(minimum_rating=80, cutoff_date=7):
 
     # search for each album and add it's tracks to playlist
     for album in recent_albums:
-        hit = api.search_for_album(" ".join((album.title, album.artist)))
-        if hit is not None:
-            # get the tracks for the album
-            tracks = api.get_tracks_from_album(hit.album_id)
-            # add the tracks to the playlist
-            api.add_tracks_to_playlist(tracks)
-            # notify added tracks
-            logger.info("Added {n} tracks from {album} by {artist}".format
-                        (n=len(tracks),
-                         album=album.title,
-                         artist=album.artist))
+        try:
+            hit = api.search_for_album(" ".join((album.title, album.artist)))
+            if hit is not None:
+                # get the tracks for the album
+                tracks = api.get_tracks_from_album(hit.album_id)
+                # add the tracks to the playlist
+                api.add_tracks_to_playlist(tracks)
+                # notify added tracks
+                logger.info("Added {n} tracks from {album} by {artist}".format
+                            (n=len(tracks),
+                             album=album.title,
+                             artist=album.artist))
+        except as e:
+            logger.error(e)
+            sys.exit()
 
     description = """\
 This playlist was created using a script written by Matt Hosack.  The new \
@@ -76,8 +80,11 @@ Last Updated {2}\
            datetime.strftime(datetime.today(), "%b %d %Y"))
 
     # update playlist description to tell that things worked
-    logger.info("Updating description to: {}".format(description))
-    api.update_playlist_description(description)
+    try:
+        logger.info("Updating description to: {}".format(description))
+        api.update_playlist_description(description)
+    except Exception as e:
+        logger.error(e)
 
 version = "0.0.1"
 ascii_art_short = """\n\
