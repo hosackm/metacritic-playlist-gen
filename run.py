@@ -76,6 +76,7 @@ Last Updated {2}\
            datetime.strftime(datetime.today(), "%b %d %Y"))
 
     # update playlist description to tell that things worked
+    logger.info("Updating description to:", description)
     api.update_playlist_description(description)
 
 version = "0.0.1"
