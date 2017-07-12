@@ -3,6 +3,7 @@ Metacritic Playlist Generator is a program that will create a Spotify playlist o
 
 ## To use this script
 You must set the following environment variables before running the script.
+
     * MPGEN_CLIENT_ID (your spotify client id)
     * MPGEN_CLIENT_SECRET (your spotify client secret
     * MPGEN_AUTH_TK (your spotify authentication token)
