@@ -81,8 +81,8 @@ class Spotify:
         """
         Returns a list of SpotifyTrack objects for the specified playlist
         """
-        url = "{}users/hosackm/playlists/{}/tracks".format(
-            self.urlbase, self.playlist_id)
+        url = "{}users/{}/playlists/{}/tracks".format(
+            self.urlbase, self.user_id, self.playlist_id)
 
         query = "?fields=items(track(name, id, artists(name)))"
 
@@ -111,8 +111,9 @@ class Spotify:
                      for track in tracks]
         }
 
-        url = "{}users/hosackm/playlists/{}/tracks".format(self.urlbase,
-                                                           self.playlist_id)
+        url = "{}users/{}}/playlists/{}/tracks".format(self.urlbase,
+                                                       self.user_id,
+                                                       self.playlist_id)
 
         resp = requests.post(url, headers=self._get_header(),
                              data=json.dumps(data))
@@ -135,8 +136,9 @@ class Spotify:
                  for track in tracks]
         }
 
-        url = "{}users/hosackm/playlists/{}/tracks".format(self.urlbase,
-                                                           self.playlist_id)
+        url = "{}users/{}/playlists/{}/tracks".format(self.urlbase,
+                                                      self.user_id,
+                                                      self.playlist_id)
         resp = requests.delete(url,
                                headers=self._get_header(),
                                data=json.dumps(data))
@@ -149,7 +151,7 @@ class Spotify:
         playlist in Spotify's web player
         """
         url = ("https://api.spotify.com/v1/users/"
-               "{}/playlists/{}".format("hosackm", self.playlist_id))
+               "{}/playlists/{}".format(self.user_id, self.playlist_id))
         header = self._get_header()
         header["Content-Type"] = "application/json"
         data = json.dumps({"description": description})

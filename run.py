@@ -1,12 +1,13 @@
 import argparse
 import textwrap
+import logging
+import sys
 from datetime import datetime, timedelta
 from mpgen.spotify import Spotify
 from mpgen.metacritic import Scraper
 
-import logging
 
-import sys
+__version__ = "0.0.1"
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -19,8 +20,10 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-def run(minimum_rating=80, cutoff_date=7):
-    logger.info(ascii_art_short)
+def run(minimum_rating=80,
+        cutoff_date=7,
+        user_id="hosackm",
+        playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
     logger.info("Searching for albums less than {0} days old that scored "
                 "{1} or higher on Metacritic".format(
                     cutoff_date, minimum_rating))
@@ -35,7 +38,7 @@ def run(minimum_rating=80, cutoff_date=7):
                      and a.rating >= minimum_rating]
 
     # create Spotify API instance
-    api = Spotify()
+    api = Spotify(user_id=user_id, playlist_id=playlist_id)
 
     # clear playlist
     removed = api.clear_playlist()
@@ -62,7 +65,7 @@ def run(minimum_rating=80, cutoff_date=7):
                             (n=len(tracks),
                              album=album.title,
                              artist=album.artist))
-        except as e:
+        except Exception as e:
             logger.error(e)
             sys.exit()
 
@@ -86,16 +89,6 @@ Last Updated {2}\
     except Exception as e:
         logger.error(e)
 
-version = "0.0.1"
-ascii_art_short = """\n\
-   _____ __________  ________
-  /     \\\\______   \/  _____/  ____   ____
- /  \ /  \|     ___/   \  ____/ __ \ /    \\
-/    Y    \    |   \    \_\  \  ___/|   |  \\
-\____|__  /____|    \______  /\___  >___|  /
-        \/                 \/     \/     \/
-version {version}\
-""".format(version=version)
 
 if __name__ == "__main__":
     desc = """\
@@ -112,6 +105,17 @@ if __name__ == "__main__":
                         metavar="RATING",
                         help="Only albums with a higher rating than this "
                              "number will be added to the playlist")
+    parser.add_argument("-u", "--user", metavar="USERNAME",
+                        help="Username of the Spotify user that owns "
+                             "the playlist")
+    parser.add_argument("-p", "--playlist", metavar="PLAYLIST-ID",
+                        help="Spotify playlist id to add songs to")
 
     args = parser.parse_args()
-    run(args.rating, args.days_ago)
+    dargs = dict(cutoff_date=args.days_ago, minimum_rating=args.rating)
+    if args.user is not None:
+        dargs.update({"user_id": args.user})
+    if args.user is not None:
+        dargs.update({"playlist_id": args.playlist})
+
+    run(**dargs)
