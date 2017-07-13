@@ -11,22 +11,19 @@ class Scraper:
         self.url = ("http://www.metacritic.com/browse/"
                     "albums/release-date/new-releases/date")
 
-    def scrape_html(self, cached_html=None):
+    def scrape_html(self):
         """
         Make a request for the most recent Metacritic New Album Releases page
 
         Return the html text or raise and Exception if the request failed
         """
-        if cached_html is None:
-            resp = requests.get(self.url,
-                                headers={"User-Agent": "MPGEN-Scraper"})
+        resp = requests.get(self.url,
+                            headers={"User-Agent": "MPGEN-Scraper"})
 
-            if resp.status_code != 200:
-                raise Exception("Unable to scrape {url}".format(url=self.url))
+        if resp.status_code != 200:
+            raise Exception("Unable to scrape {url}".format(url=self.url))
 
-            html = resp.text
-        else:
-            html = cached_html
+        html = resp.text
 
         # Take html from metacritic and return a list of parsed albums from it
         soup = Soup(html, "html.parser")

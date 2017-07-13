@@ -1,8 +1,12 @@
 import os
 import unittest
+from unittest.mock import patch
 import mpgen.metacritic as metacritic
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup as Soup
+
+FILEPATH = os.path.join(os.path.dirname(__file__),
+                        "resources", "metacritic_sample.html")
 
 
 class TestMetacriticParse(unittest.TestCase):
@@ -11,8 +15,22 @@ class TestMetacriticParse(unittest.TestCase):
     are what we expect
     """
     def setUp(self):
+        """
+        Setup mock for HTTP request method and do scraping
+        """
+        self.patcher = patch("mpgen.metacritic.requests.get")
+        self.mockobj = self.patcher.start()
+
+        self.mockobj.return_value.status_code = 200
+        with open(FILEPATH, encoding="utf8") as f:
+            self.mockobj.return_value.text = f.read()
+
         self.scraper = metacritic.Scraper()
-        self.albums = self.scraper.scrape_html(cached_html=response_text)
+        self.albums = self.scraper.scrape_html()
+
+    def tearDown(self):
+        "Teardown mock"
+        self.patcher.stop()
 
     def test_first_and_last_parsed_correctly(self):
         """
@@ -54,12 +72,15 @@ class TestMetacriticParse(unittest.TestCase):
         """
         now = datetime.now()
         more_than_three_months_ahead = now + timedelta(weeks=16)
-        li_html = fake_product_html.format(
-            title="Fake Title",
-            date=more_than_three_months_ahead.strftime("%b %d"),
-            artist="Fake Artist",
-            rating=93
-            )
+        li_html = no_rating_html = """
+            <li>
+            <div class="product_score">{0}</div>
+            <div class="product_title">{1}</div>
+            <li class="release_date"><span class="data">{2}</span></li>
+            <li class="product_artist"><span class="data">{3}</span></li>
+            </li>
+            """.format(93, "",
+                       more_than_three_months_ahead.strftime("%b %d"), "")
         li_soup = Soup(li_html, "html.parser")
 
         album = metacritic.Album.from_list_item(li_soup)
@@ -67,11 +88,14 @@ class TestMetacriticParse(unittest.TestCase):
         self.assertEqual(album.date.year + 1, now.year)
 
     def test_tbd_rating_parses_to_zero(self):
-        no_rating_html = fake_product_html.format(
-            date="Dec 25",
-            title="",
-            artist="",
-            rating="tbd")
+        no_rating_html = """
+            <li>
+            <div class="product_score">{0}</div>
+            <div class="product_title">{1}</div>
+            <li class="release_date"><span class="data">{2}</span></li>
+            <li class="product_artist"><span class="data">{3}</span></li>
+            </li>
+            """.format("tdb", "", "Dec 25", "")
         nr_soup = Soup(no_rating_html, "html.parser")
         album = metacritic.Album.from_list_item(nr_soup)
 
@@ -89,22 +113,6 @@ class TestMetacriticParse(unittest.TestCase):
 
     def test_scraper_returns_200_albums(self):
         self.assertEqual(len(self.albums), 200)
-
-# read local copy of metacritic site from June 21, 2017 contains 200 albums
-response_text = ""
-filepath = os.path.join(os.path.dirname(__file__), "metacritic_sample.html")
-with open(filepath, encoding="utf8") as f:
-    response_text = f.read()
-
-# metacritic html representations of albums for testing
-fake_product_html = """
-<li>
-  <div class="product_score">{rating}</div>
-  <div class="product_title">{title}</div>
-  <li class="release_date"><span class="data">{date}</span></li>
-  <li class="product_artist"><span class="data">{artist}</span></li>
-</li>
-"""
 
 if __name__ == "__main__":
     unittest.main()
