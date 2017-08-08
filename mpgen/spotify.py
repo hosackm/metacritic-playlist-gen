@@ -172,10 +172,12 @@ class Spotify:
         if resp.status_code != 200:
             raise Exception("Search request to API failed{}".format(resp.json()))
 
+        # create an album based on the json results
         albums = [SpotifyAlbum.from_album_json(album)
                   for album in resp.json()["albums"]["items"]]
-
-        return self._get_best_album(album_query_string, albums)
+        if albums:
+            # return the highest ranked album
+            return self._get_best_album(album_query_string, albums)
 
     def get_tracks_from_album(self, album):
         """
