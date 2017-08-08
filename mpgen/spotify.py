@@ -41,7 +41,7 @@ class Auth:
         # POST request and check that it was successful
         resp = requests.post(self.auth_url, data=data, headers=headers)
         if resp.status_code != 200:
-            raise Exception("Unable to refresh auth token{}".format(resp.text))
+            raise Exception("Unable to refresh auth token: {}".format(resp.json()))
 
         # parse json response and store the token and expiration date
         payload = resp.json()
@@ -103,15 +103,11 @@ class Spotify:
         resp = requests.get(url+query, headers=self.auth.get_token_as_header())
 
         if resp.status_code != 200:
-            raise Exception(
-                "Unable to get playlist tracks from Spotify API {}".format(
-                    resp.text))
+            raise Exception("Unable to get playlist tracks from Spotify API: {}".format(resp.json()))
 
         items = resp.json().get("items")
 
-        return [SpotifyTrack.from_track_json(track.get("track"))
-                for track
-                in items]
+        return [SpotifyTrack.from_track_json(track.get("track")) for track in items]
 
     def add_tracks_to_playlist(self, tracks):
         """
@@ -120,21 +116,15 @@ class Spotify:
         if not isinstance(tracks, collections.Iterable):
             tracks = [tracks]
 
-        data = {
-            "uris": ["spotify:track:{}".format(track.track_id)
-                     for track in tracks]
-        }
-
+        data = {"uris": [track.to_uri() for track in tracks]}
         url = "{}users/{}}/playlists/{}/tracks".format(self.urlbase,
                                                        self.user_id,
                                                        self.playlist_id)
 
-        resp = requests.post(url, headers=self.auth.get_token_as_header(),
-                             data=json.dumps(data))
-
+        # POST http request to API and ensure it returns 201
+        resp = requests.post(url, headers=self.auth.get_token_as_header(), data=json.dumps(data))
         if resp.status_code != 201:
-            raise Exception("Unable to add tracks to the playlist {}".format(
-                resp.text))
+            raise Exception("Unable to add tracks to the playlist: {}".format(resp.json()))
 
     def delete_tracks_from_playlist(self, tracks):
         """
@@ -143,16 +133,13 @@ class Spotify:
         if not isinstance(tracks, collections.Iterable):
             tracks = [tracks]
 
-        # Spotify doesn't allow more simultaneous deletes than 100
-        data = {
-            "tracks":
-                [{"uri": "spotify:track:{}".format(track.track_id)}
-                 for track in tracks]
-        }
-
+        # convert uris into a json object
+        data = {"tracks": [{"uri": track.to_uri()} for track in tracks]}
         url = "{}users/{}/playlists/{}/tracks".format(self.urlbase,
                                                       self.user_id,
                                                       self.playlist_id)
+
+        # DELETE http request to delete the tracks and ensure 200 was returned
         resp = requests.delete(url,
                                headers=self.auth.get_token_as_header(),
                                data=json.dumps(data))
@@ -164,44 +151,41 @@ class Spotify:
         Update the text description diplayed on the page when viewing a
         playlist in Spotify's web player
         """
-        url = ("https://api.spotify.com/v1/users/"
-               "{}/playlists/{}".format(self.user_id, self.playlist_id))
+        url = "{}users{}/playlists/{}".format(self.urlbase, self.user_id, self.playlist_id)
         header = self.auth.get_token_as_header()
         header["Content-Type"] = "application/json"
         data = json.dumps({"description": description})
 
+        # PUT http request to update description of playlist
         resp = requests.put(url, headers=header, data=data)
         if resp.status_code != 200:
-            raise Exception("Unable to update playlist description."
-                            " {}".format(resp.text))
+            raise Exception("Unable to update playlist description: {}".format(resp.json()))
 
     def search_for_album(self, album_query_string):
         """
         Search for an album by album title and return first result
         """
         q = "q=album:{}&type=album".format(qp(album_query_string))
-        url = "https://api.spotify.com/v1/search?{}".format(q)
+        url = "{}search?{}".format(self.urlbase, q)
 
         resp = requests.get(url, headers=self.auth.get_token_as_header())
         if resp.status_code != 200:
-            raise Exception("Search request to API failed{}".format(resp.text))
+            raise Exception("Search request to API failed{}".format(resp.json()))
 
         albums = [SpotifyAlbum.from_album_json(album)
                   for album in resp.json()["albums"]["items"]]
 
         return self._get_best_album(album_query_string, albums)
 
-    def get_tracks_from_album(self, album_id):
+    def get_tracks_from_album(self, album):
         """
-        Return a SpotifyTrack for every track in album_id
+        Return a SpotifyTrack for every track in album
         """
-        url = "https://api.spotify.com/v1/albums/{}/tracks".format(album_id)
+        url = "https://api.spotify.com/v1/albums/{}/tracks".format(album.album_id)
 
         resp = requests.get(url, headers=self.auth.get_token_as_header())
         if resp.status_code != 200:
-            raise Exception(
-                "API Failed to retrieve tracks for album. {}".format(
-                    resp.text))
+            raise Exception("API Failed to retrieve tracks for album: {}".format(resp.json()))
 
         items = resp.json().get("items")
 
@@ -216,7 +200,7 @@ class Spotify:
         """
         # filter out single albums or albums that match with less than 90% confidence
         matches = [dict(album=a, match=a.match(match_string)) for a in albums
-                   if len(self.get_tracks_from_album(a.album_id)) > 1 and
+                   if len(self.get_tracks_from_album(a)) > 1 and
                    a.match(match_string) > 90]
 
         if matches:
@@ -234,9 +218,10 @@ class SpotifyAlbum:
         self.album_id = album_id
 
     def __repr__(self):
-        return ("SpotifyAlbum(artist='{artist}', title='{title}'"
-                ", id='{id}')").format(
-                    artist=self.artist, title=self.title, id=self.album_id)
+        return "SpotifyAlbum(artist='{artist}', title='{title}', id='{id}')".format(
+                    artist=self.artist,
+                    title=self.title,
+                    id=self.album_id)
 
     @classmethod
     def from_album_json(cls, album):
@@ -259,16 +244,19 @@ class SpotifyTrack:
         self.track_id = track_id
 
     def __repr__(self):
-        return ("SpotifyTrack(artist='{artist}', title='{title}'"
-                ", id='{id}')").format(
-                    artist=self.artist, title=self.title, id=self.track_id)
+        return "SpotifyTrack(artist='{artist}', title='{title}', id='{id}')".format(
+                    artist=self.artist,
+                    title=self.title,
+                    id=self.track_id)
 
     @classmethod
     def from_track_json(cls, track):
         """
-        Convert a JSON 'track' object from the Spotify API into a SpotifyTrack
+        Convert a JSON track object from the Spotify API into a SpotifyTrack
         """
         return cls(artist=track.get("artists")[0].get("name"),
                    track_id=track.get("id"),
-                   title=track.get("name")
-                   )
+                   title=track.get("name"))
+
+    def to_uri(self):
+        return "spotify:track:{}".format(self.track_id)
