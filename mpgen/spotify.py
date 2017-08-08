@@ -186,18 +186,10 @@ class Spotify:
         if resp.status_code != 200:
             raise Exception("Search request to API failed{}".format(resp.text))
 
-        try:
-            albums_json = json.loads(resp.text)["albums"]["items"]
-        except:
-            return None
+        albums = [SpotifyAlbum.from_album_json(album)
+                  for album in json.loads(resp.text)["albums"]["items"]]
 
-        # ToDo: fuzzy find the correct album that is not a singles album
-        album_match = self._fuzzy_find_album(album_query_string, albums_json)
-
-        if album_match:
-            return SpotifyAlbum.from_album_json(album_match)
-
-        return None
+        return self._get_best_album(album_query_string, albums)
 
     def get_tracks_from_album(self, album_id):
         """
@@ -213,41 +205,26 @@ class Spotify:
 
         items = json.loads(resp.text).get("items")
 
-        return [SpotifyTrack.from_track_json(track)
-                for track
-                in items]
+        return [SpotifyTrack.from_track_json(track) for track in items]
 
-    def _fuzzy_find_album(self, match_string, albums):
+    def _get_best_album(self, match_string, albums):
         """
         Find a matching album given a list of search results from Spotify.
 
         The album should not be a single and should also fuzzy match the artist
         and title  within a certain threshold
         """
-        # filter out single albums
-        non_singles = []
-        for album in albums:
-            album_id = album["uri"].split(":")[-1]
-            if len(self.get_tracks_from_album(album_id)) > 1:
-                non_singles.append(album)
+        # filter out single albums or albums that match with less than 90% confidence
+        matches = [dict(album=a, match=a.match(match_string)) for a in albums
+                   if len(self.get_tracks_from_album(a.album_id)) > 1 and
+                   a.match(match_string) > 90]
 
-        # zip album json and the matching string from the spotify search result
-        json_and_album_title_pairs = [
-            (a, a["name"] + " " + a["artists"][0]["name"])
-            for a in non_singles]
-
-        # do fuzzy string matching on artist and album title
-        best_match = (None, 0)
-        for album, album_and_title in json_and_album_title_pairs:
-            ratio = fuzz.token_set_ratio(match_string, album_and_title)
-            if ratio > best_match[1]:
-                best_match = (album, ratio)
-
-        # if match ratio is above 90% confidence return the album
-        if best_match[1] > 90:
-            return best_match[0]
-        # otherwise we couldn't find a good match for the album
-        return None
+        if matches:
+            # return the highest matched album
+            topresult = sorted(matches, key=lambda x: x["match"], reverse=True)[0]
+            return topresult["album"]
+        else:
+            return None
 
 
 class SpotifyAlbum:
@@ -266,6 +243,13 @@ class SpotifyAlbum:
         return cls(artist=album["artists"][0]["name"],
                    title=album["name"],
                    album_id=album["uri"].split(":")[-1])  # strip spotify:album
+
+    def match(self, query):
+        """
+        Returns a percentage of confidence that an album matches a query string
+        """
+        artist_and_title = "{} {}".format(self.title, self.artist)
+        return fuzz.token_set_ratio(query, artist_and_title)
 
 
 class SpotifyTrack:
