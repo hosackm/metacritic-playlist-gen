@@ -44,7 +44,7 @@ class Auth:
             raise Exception("Unable to refresh auth token{}".format(resp.text))
 
         # parse json response and store the token and expiration date
-        payload = json.loads(resp.text)
+        payload = resp.json()
         self.token = payload.get("access_token")
         self.token_expires = datetime.now() + timedelta(seconds=int(payload.get("expires_in")))
 
@@ -107,7 +107,7 @@ class Spotify:
                 "Unable to get playlist tracks from Spotify API {}".format(
                     resp.text))
 
-        items = json.loads(resp.text).get("items")
+        items = resp.json().get("items")
 
         return [SpotifyTrack.from_track_json(track.get("track"))
                 for track
@@ -187,7 +187,7 @@ class Spotify:
             raise Exception("Search request to API failed{}".format(resp.text))
 
         albums = [SpotifyAlbum.from_album_json(album)
-                  for album in json.loads(resp.text)["albums"]["items"]]
+                  for album in resp.json()["albums"]["items"]]
 
         return self._get_best_album(album_query_string, albums)
 
@@ -203,7 +203,7 @@ class Spotify:
                 "API Failed to retrieve tracks for album. {}".format(
                     resp.text))
 
-        items = json.loads(resp.text).get("items")
+        items = resp.json().get("items")
 
         return [SpotifyTrack.from_track_json(track) for track in items]
 
