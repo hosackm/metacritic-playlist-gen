@@ -72,7 +72,7 @@ class TestMetacriticParse(unittest.TestCase):
         """
         now = datetime.now()
         more_than_three_months_ahead = now + timedelta(weeks=16)
-        li_html = no_rating_html = """
+        three_months_html = """
             <li>
             <div class="product_score">{0}</div>
             <div class="product_title">{1}</div>
@@ -81,7 +81,7 @@ class TestMetacriticParse(unittest.TestCase):
             </li>
             """.format(93, "",
                        more_than_three_months_ahead.strftime("%b %d"), "")
-        li_soup = Soup(li_html, "html.parser")
+        li_soup = Soup(three_months_html, "html.parser")
 
         album = metacritic.Album.from_list_item(li_soup)
 
@@ -95,7 +95,7 @@ class TestMetacriticParse(unittest.TestCase):
             <li class="release_date"><span class="data">{2}</span></li>
             <li class="product_artist"><span class="data">{3}</span></li>
             </li>
-            """.format("tdb", "", "Dec 25", "")
+            """.format("tdb", "", "Dec 24", "")
         nr_soup = Soup(no_rating_html, "html.parser")
         album = metacritic.Album.from_list_item(nr_soup)
 

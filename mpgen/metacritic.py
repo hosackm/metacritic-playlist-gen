@@ -101,7 +101,7 @@ class Album:
         date = date.replace(year=datetime.now().year)
 
         # metacritic doesn't report albums 3 months ahead of their release
-        if date.month > datetime.now().month + 3:
+        if date.month >= datetime.now().month + 3:
             # this album must be from last year
             # ie. it's Jan and this album was release in Dec
             date = date.replace(year=date.year-1)
