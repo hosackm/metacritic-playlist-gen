@@ -217,6 +217,9 @@ class SpotifyAlbum:
         self.title = title
         self.album_id = album_id
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def __repr__(self):
         return "SpotifyAlbum(artist='{artist}', title='{title}', id='{id}')".format(
                     artist=self.artist,
@@ -242,6 +245,9 @@ class SpotifyTrack:
         self.artist = artist
         self.title = title
         self.track_id = track_id
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     def __repr__(self):
         return "SpotifyTrack(artist='{artist}', title='{title}', id='{id}')".format(
