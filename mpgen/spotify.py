@@ -97,11 +97,9 @@ class Spotify:
         """
         url = "{}users/{}/playlists/{}/tracks".format(
             self.urlbase, self.user_id, self.playlist_id)
-
         query = "?fields=items(track(name, id, artists(name)))"
 
         resp = requests.get(url+query, headers=self.auth.get_token_as_header())
-
         if resp.status_code != 200:
             raise Exception("Unable to get playlist tracks from Spotify API: {}".format(resp.json()))
 
@@ -183,7 +181,7 @@ class Spotify:
         """
         Return a SpotifyTrack for every track in album
         """
-        url = "https://api.spotify.com/v1/albums/{}/tracks".format(album.album_id)
+        url = "{}albums/{}/tracks".format(self.urlbase, album.album_id)
 
         resp = requests.get(url, headers=self.auth.get_token_as_header())
         if resp.status_code != 200:
