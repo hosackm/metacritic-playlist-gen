@@ -44,20 +44,20 @@ class TestAuth(unittest.TestCase):
         self.assertEqual(auth.ref_tk, "ref_tk")
 
     @mock.patch("mpgen.spotify.Auth.get_token")
-    def test_get_auth_header(self, mocktocken):
+    def test_get_auth_header(self, mocktoken):
         """
         Tests that the auth object is able to produce the correct base64
         encoded string to use for authorization
         """
         faketoken = "ABCD1234"
         fakeheader = {"Authorization": "Bearer {}".format(faketoken)}
-        mocktocken.return_value = fakeheader
+        mocktoken.return_value = fakeheader
 
         self.assertTrue(self.auth.get_token_as_header(), fakeheader)
 
     def test_token_expired(self):
         now = datetime.datetime.now()
-        ahead_10s = now + datetime.timedelta(seconds=10)
+        ahead_15s = now + datetime.timedelta(seconds=15)
         behind_10s = now - datetime.timedelta(seconds=10)
         ahead_20s = now + datetime.timedelta(seconds=20)
 
@@ -67,7 +67,7 @@ class TestAuth(unittest.TestCase):
         self.auth.token_expires = behind_10s
         self.assertTrue(self.auth.token_expired())
 
-        self.auth.token_expires = ahead_10s
+        self.auth.token_expires = ahead_15s
         self.assertFalse(self.auth.token_expired())
 
         self.auth.token_expires = ahead_20s
