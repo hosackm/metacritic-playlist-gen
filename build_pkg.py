@@ -25,7 +25,6 @@ def main():
     Package mpgen and dependent Python packages into zip for uploading to
     AWS Lambda instance
     """
-    package_name = "mpgen.py"
     tmpdir = "mpgen.tmp"
 
     # remove leftover folders we are about to make
