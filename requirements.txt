@@ -7,3 +7,5 @@ idna==2.5
 python-Levenshtein==0.12.0
 requests==2.20.0
 urllib3==1.24.2
+pytest
+requests_mock
