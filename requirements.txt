@@ -7,3 +7,5 @@ idna
 python-Levenshtein
 requests
 urllib3
+pytest
+requests_mock
