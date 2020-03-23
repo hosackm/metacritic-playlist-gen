@@ -1,11 +1,8 @@
-beautifulsoup4
-bs4
-certifi
-chardet
-fuzzywuzzy
-idna
-python-Levenshtein
-requests
-urllib3
 pytest
+click
+requests
 requests_mock
+boto3
+scrapy
+python-Levenshtein
+fuzzywuzzy

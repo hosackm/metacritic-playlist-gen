@@ -1,7 +1,7 @@
 import requests
 import os
 import datetime
-from mpgen.spotify import Auth, Spotify, SpotifyTrack, SpotifyAlbum
+from metafy.spotify import Auth, Spotify, SpotifyTrack, SpotifyAlbum
 
 
 def test_auth_acquires_values_from_environment(AuthEnv):
