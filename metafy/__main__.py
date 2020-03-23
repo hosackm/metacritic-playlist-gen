@@ -60,6 +60,9 @@ def build_pkg(output):
             packages_glob = "venv/lib/python{0}.{1}/site-packages/*".format(mj, mn)
 
         for f in glob.glob(packages_glob):
+            if "metafy" in f:
+                # avoid recursive addition of this package
+                continue
             copy_file_or_dir(f, tmpdir)
 
         # zip everything up and remove tmp folder
