@@ -48,9 +48,12 @@ def build_pkg(output):
 
     # make temporary working dir
     with tempfile.TemporaryDirectory(prefix="metafy") as tmpdir:
+        package_path = os.path.join(tmpdir, "metafy")
+        os.makedirs(package_path)
+
         # copy src files
         for f in glob.glob("metafy/*.py"):
-            copy_file_or_dir(f, os.path.join(tmpdir, "metafy"))
+            copy_file_or_dir(f, package_path)
 
         # copy packages
         if "Windows" in platform.platform():
