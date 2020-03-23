@@ -99,4 +99,4 @@ ENV/
 .mypy_cache/
 
 # ignore AWS Lambda package
-mpgen.zip
+*.zip
