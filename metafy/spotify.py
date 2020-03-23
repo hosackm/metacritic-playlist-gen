@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 
 
 class SpotifyAlbum:
-    def __init__(self, artist, title, album_id):
+    def __init__(self, artist: str, title: str, album_id: str):
         self.artist = artist
         self.title = title
         self.album_id = album_id
@@ -25,12 +25,12 @@ class SpotifyAlbum:
                     id=self.album_id)
 
     @classmethod
-    def from_album_json(cls, album):
+    def from_album_json(cls, album: Dict):
         return cls(artist=album["artists"][0]["name"],
                    title=album["name"],
                    album_id=album["uri"].split(":")[-1])  # strip spotify:album
 
-    def match(self, query):
+    def match(self, query: str):
         """
         Returns a percentage of confidence that an album matches a query string
         """
@@ -39,22 +39,24 @@ class SpotifyAlbum:
 
 
 class SpotifyTrack:
-    def __init__(self, artist, title, track_id):
+    def __init__(self, artist: str, title: str, track_id: str):
         self.artist = artist
         self.title = title
         self.track_id = track_id
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SpotifyTrack):
+            raise NotImplementedError
         return self.__dict__ == other.__dict__
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "SpotifyTrack(artist='{artist}', title='{title}', id='{id}')".format(
                     artist=self.artist,
                     title=self.title,
                     id=self.track_id)
 
     @classmethod
-    def from_track_json(cls, track):
+    def from_track_json(cls, track: Dict):
         """
         Convert a JSON track object from the Spotify API into a SpotifyTrack
         """
@@ -62,14 +64,14 @@ class SpotifyTrack:
                    track_id=track.get("id"),
                    title=track.get("name"))
 
-    def to_uri(self):
+    def to_uri(self) -> str:
         return "spotify:track:{}".format(self.track_id)
 
 
 class Auth:
     auth_url = "https://accounts.spotify.com/api/token"
 
-    def __init__(self, ref_tk=None):
+    def __init__(self, ref_tk: str=None):
         self.client_id = os.environ["SPOTIFY_CLIENT_ID"]
         self.client_secret = os.environ["SPOTIFY_CLIENT_SECRET"]
         self.ref_tk = ref_tk or os.environ["SPOTIFY_REF_TK"]
@@ -131,7 +133,7 @@ class Spotify:
     urlbase = "https://api.spotify.com/v1/"
 
     def __init__(self,
-                 playlist_id="65RYrUbKJgX0eJHBIZ14Fe"):
+                 playlist_id: str="65RYrUbKJgX0eJHBIZ14Fe"):
         self.auth = Auth()
         self.playlist_id = playlist_id
 
@@ -160,7 +162,7 @@ class Spotify:
 
         return [SpotifyTrack.from_track_json(track.get("track")) for track in items]
 
-    def add_tracks_to_playlist(self, tracks):
+    def add_tracks_to_playlist(self, tracks: List[SpotifyTrack]):
         """
         Adds the given SpotifyTracks to the playlist_id
         """
@@ -176,7 +178,7 @@ class Spotify:
         if resp.status_code != 201:
             raise Exception("Unable to add tracks to the playlist: {}".format(resp.json()))
 
-    def delete_tracks_from_playlist(self, tracks):
+    def delete_tracks_from_playlist(self, tracks: List[SpotifyTrack]):
         """
         Removes the given SpotifyTracks from the playlist_id
         """
@@ -195,7 +197,7 @@ class Spotify:
         if resp.status_code != 200:
             raise Exception("Unable to delete tracks")
 
-    def update_playlist_description(self, description):
+    def update_playlist_description(self, description: str):
         """
         Update the text description diplayed on the page when viewing a
         playlist in Spotify's web player
@@ -210,7 +212,7 @@ class Spotify:
         if resp.status_code != 200:
             raise Exception("Unable to update playlist description: {}".format(resp.json()))
 
-    def search_for_album(self, album_query_string) -> Optional[SpotifyAlbum]:
+    def search_for_album(self, album_query_string: str) -> Optional[SpotifyAlbum]:
         """
         Search for an album by album title and return first result
         """
@@ -228,7 +230,7 @@ class Spotify:
             # return the highest ranked album
             return self._get_best_album(album_query_string, albums)
 
-    def get_tracks_from_album(self, album) -> List[SpotifyTrack]:
+    def get_tracks_from_album(self, album: SpotifyAlbum) -> List[SpotifyTrack]:
         """
         Return a SpotifyTrack for every track in album
         """
@@ -242,7 +244,7 @@ class Spotify:
 
         return [SpotifyTrack.from_track_json(track) for track in items]
 
-    def _get_best_album(self, match_string, albums) -> Optional[SpotifyAlbum]:
+    def _get_best_album(self, match_string: str, albums: SpotifyAlbum) -> Optional[SpotifyAlbum]:
         """
         Find a matching album given a list of search results from Spotify.
 

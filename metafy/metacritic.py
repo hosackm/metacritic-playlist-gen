@@ -13,6 +13,8 @@ from scrapy.exceptions import DropItem
 from scrapy.utils.project import get_project_settings
 from scrapy.crawler import CrawlerProcess
 from scrapy.item import Item
+from scrapy.http import TextResponse
+from scrapy.spiders import Spider
 
 
 class MetacriticSpider(scrapy.Spider):
@@ -20,7 +22,7 @@ class MetacriticSpider(scrapy.Spider):
     allowed_domains = ['metacritic.com']
     start_urls = ['http://www.metacritic.com/browse/albums/release-date/new-releases/date']
 
-    def parse(self, response) -> Dict:
+    def parse(self, response: TextResponse) -> Dict:
         products = response.css("div.product_wrap")
         for product in products:
             # generate datetime from HTML parsed Month+Day string
@@ -45,7 +47,7 @@ class MetacriticSpider(scrapy.Spider):
             }
 
 
-def recent_and_above_80(item, date_thresh=timedelta(weeks=1), score_thresh=80) -> bool:
+def recent_and_above_80(item, date_thresh: timedelta=timedelta(weeks=1), score_thresh: int=80) -> bool:
     """Returns True if an album scored higher than score_thresh and is more recent than date_thresh
 
     Arguments:
@@ -69,7 +71,7 @@ def recent_and_above_80(item, date_thresh=timedelta(weeks=1), score_thresh=80) -
 
 
 class AlbumsPipeline(object):
-    def open_spider(self, spider):
+    def open_spider(self, spider: Spider):
         settings = get_project_settings()
         self.bucket = Session(aws_access_key_id=settings.get("AWS_ACCESS_KEY_ID"),
                               aws_secret_access_key=settings.get("AWS_SECRET_ACCESS_KEY"),
@@ -78,13 +80,13 @@ class AlbumsPipeline(object):
                                       os.environ["S3_BUCKET_NAME"])
         self.items = []
 
-    def close_spider(self, spider):
+    def close_spider(self, spider: Spider):
         self.bucket.upload_fileobj(BytesIO(json.dumps(self.items,
                                                       indent=4,
                                                       sort_keys=True).encode()),
                                    "albums.json")
 
-    def process_item(self, item, spider) -> Item:
+    def process_item(self, item: Item, spider: Spider) -> Item:
         if not recent_and_above_80(item):
             raise DropItem
         self.items.append(item)
