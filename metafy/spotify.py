@@ -11,12 +11,9 @@ from urllib.parse import quote_plus as qp
 class Auth:
     auth_url = "https://accounts.spotify.com/api/token"
 
-    def __init__(self,
-                 client_id=None,
-                 client_secret=None,
-                 ref_tk=None):
-        self.client_id = client_id or os.environ["SPOTIFY_CLIENT_ID"]
-        self.client_secret = client_secret or os.environ["SPOTIFY_CLIENT_SECRET"]
+    def __init__(self, ref_tk=None):
+        self.client_id = os.environ["SPOTIFY_CLIENT_ID"]
+        self.client_secret = os.environ["SPOTIFY_CLIENT_SECRET"]
         self.ref_tk = ref_tk or os.environ["SPOTIFY_REF_TK"]
         self.token = None
         self.token_expires = None
