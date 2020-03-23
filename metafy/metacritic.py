@@ -6,10 +6,13 @@ import json
 import scrapy
 from io import BytesIO
 from datetime import datetime, timedelta
+from typing import Dict
+
 from boto3.session import Session
 from scrapy.exceptions import DropItem
 from scrapy.utils.project import get_project_settings
 from scrapy.crawler import CrawlerProcess
+from scrapy.item import Item
 
 
 class MetacriticSpider(scrapy.Spider):
@@ -17,7 +20,7 @@ class MetacriticSpider(scrapy.Spider):
     allowed_domains = ['metacritic.com']
     start_urls = ['http://www.metacritic.com/browse/albums/release-date/new-releases/date']
 
-    def parse(self, response):
+    def parse(self, response) -> Dict:
         products = response.css("div.product_wrap")
         for product in products:
             # generate datetime from HTML parsed Month+Day string
@@ -42,7 +45,7 @@ class MetacriticSpider(scrapy.Spider):
             }
 
 
-def recent_and_above_80(item, date_thresh=timedelta(weeks=1), score_thresh=80):
+def recent_and_above_80(item, date_thresh=timedelta(weeks=1), score_thresh=80) -> bool:
     """Returns True if an album scored higher than score_thresh and is more recent than date_thresh
 
     Arguments:
@@ -81,7 +84,7 @@ class AlbumsPipeline(object):
                                                       sort_keys=True).encode()),
                                    "albums.json")
 
-    def process_item(self, item, spider):
+    def process_item(self, item, spider) -> Item:
         if not recent_and_above_80(item):
             raise DropItem
         self.items.append(item)

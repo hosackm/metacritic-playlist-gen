@@ -6,6 +6,64 @@ from datetime import datetime, timedelta
 from fuzzywuzzy import fuzz
 from base64 import b64encode
 from urllib.parse import quote_plus as qp
+from typing import Dict, List, Optional
+
+
+class SpotifyAlbum:
+    def __init__(self, artist, title, album_id):
+        self.artist = artist
+        self.title = title
+        self.album_id = album_id
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __repr__(self):
+        return "SpotifyAlbum(artist='{artist}', title='{title}', id='{id}')".format(
+                    artist=self.artist,
+                    title=self.title,
+                    id=self.album_id)
+
+    @classmethod
+    def from_album_json(cls, album):
+        return cls(artist=album["artists"][0]["name"],
+                   title=album["name"],
+                   album_id=album["uri"].split(":")[-1])  # strip spotify:album
+
+    def match(self, query):
+        """
+        Returns a percentage of confidence that an album matches a query string
+        """
+        artist_and_title = "{} {}".format(self.title, self.artist)
+        return fuzz.token_set_ratio(query, artist_and_title)
+
+
+class SpotifyTrack:
+    def __init__(self, artist, title, track_id):
+        self.artist = artist
+        self.title = title
+        self.track_id = track_id
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __repr__(self):
+        return "SpotifyTrack(artist='{artist}', title='{title}', id='{id}')".format(
+                    artist=self.artist,
+                    title=self.title,
+                    id=self.track_id)
+
+    @classmethod
+    def from_track_json(cls, track):
+        """
+        Convert a JSON track object from the Spotify API into a SpotifyTrack
+        """
+        return cls(artist=track.get("artists")[0].get("name"),
+                   track_id=track.get("id"),
+                   title=track.get("name"))
+
+    def to_uri(self):
+        return "spotify:track:{}".format(self.track_id)
 
 
 class Auth:
@@ -45,14 +103,14 @@ class Auth:
         self.token = payload.get("access_token")
         self.token_expires = datetime.now() + timedelta(seconds=int(payload.get("expires_in")))
 
-    def token_expired(self):
+    def token_expired(self) -> bool:
         """
         Returns True if a token has expired or will expire in less than 10 seconds (just to be safe)
         """
         timeleft = self.token_expires - datetime.now()
         return True if timeleft < timedelta(seconds=10) else False
 
-    def get_token(self):
+    def get_token(self) -> str:
         """
         Try to get cached token or reauthorize
         """
@@ -61,7 +119,7 @@ class Auth:
 
         return self.token
 
-    def get_token_as_header(self):
+    def get_token_as_header(self) -> Dict:
         """
         Return authorization token as a request header
         """
@@ -77,7 +135,7 @@ class Spotify:
         self.auth = Auth()
         self.playlist_id = playlist_id
 
-    def clear_playlist(self):
+    def clear_playlist(self) -> List[SpotifyTrack]:
         """
         Removes all tracks from the playlist
         """
@@ -86,7 +144,7 @@ class Spotify:
 
         return tracks
 
-    def get_tracks_from_playlist(self):
+    def get_tracks_from_playlist(self) -> List[SpotifyTrack]:
         """
         Returns a list of SpotifyTrack objects for the specified playlist
         """
@@ -152,7 +210,7 @@ class Spotify:
         if resp.status_code != 200:
             raise Exception("Unable to update playlist description: {}".format(resp.json()))
 
-    def search_for_album(self, album_query_string):
+    def search_for_album(self, album_query_string) -> Optional[SpotifyAlbum]:
         """
         Search for an album by album title and return first result
         """
@@ -170,7 +228,7 @@ class Spotify:
             # return the highest ranked album
             return self._get_best_album(album_query_string, albums)
 
-    def get_tracks_from_album(self, album):
+    def get_tracks_from_album(self, album) -> List[SpotifyTrack]:
         """
         Return a SpotifyTrack for every track in album
         """
@@ -184,7 +242,7 @@ class Spotify:
 
         return [SpotifyTrack.from_track_json(track) for track in items]
 
-    def _get_best_album(self, match_string, albums):
+    def _get_best_album(self, match_string, albums) -> Optional[SpotifyAlbum]:
         """
         Find a matching album given a list of search results from Spotify.
 
@@ -202,60 +260,3 @@ class Spotify:
             return topresult["album"]
         else:
             return None
-
-
-class SpotifyAlbum:
-    def __init__(self, artist, title, album_id):
-        self.artist = artist
-        self.title = title
-        self.album_id = album_id
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def __repr__(self):
-        return "SpotifyAlbum(artist='{artist}', title='{title}', id='{id}')".format(
-                    artist=self.artist,
-                    title=self.title,
-                    id=self.album_id)
-
-    @classmethod
-    def from_album_json(cls, album):
-        return cls(artist=album["artists"][0]["name"],
-                   title=album["name"],
-                   album_id=album["uri"].split(":")[-1])  # strip spotify:album
-
-    def match(self, query):
-        """
-        Returns a percentage of confidence that an album matches a query string
-        """
-        artist_and_title = "{} {}".format(self.title, self.artist)
-        return fuzz.token_set_ratio(query, artist_and_title)
-
-
-class SpotifyTrack:
-    def __init__(self, artist, title, track_id):
-        self.artist = artist
-        self.title = title
-        self.track_id = track_id
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def __repr__(self):
-        return "SpotifyTrack(artist='{artist}', title='{title}', id='{id}')".format(
-                    artist=self.artist,
-                    title=self.title,
-                    id=self.track_id)
-
-    @classmethod
-    def from_track_json(cls, track):
-        """
-        Convert a JSON track object from the Spotify API into a SpotifyTrack
-        """
-        return cls(artist=track.get("artists")[0].get("name"),
-                   track_id=track.get("id"),
-                   title=track.get("name"))
-
-    def to_uri(self):
-        return "spotify:track:{}".format(self.track_id)
