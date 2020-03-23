@@ -1,12 +1,13 @@
-# metacritic-playlist-gen
-Metacritic Playlist Generator is a program that will create a Spotify playlist of albums that were highly rated on Metacritic.
+# Metafy
+Metafy a program that will create a [Spotify playlist](https://open.spotify.com/playlist/65RYrUbKJgX0eJHBIZ14Fe?si=-TBJlxIFQtGiU0dT45Mxqw) of albums that were highly rated on Metacritic.  It runs weekly on Monday mornings and generates a playlist based on the previous weeks best rated albums.
 
-## To use this script
-You must set the following environment variables before running the script.
+## Install
+To install the package run:
 
-    * MPGEN_CLIENT_ID (your spotify client id)
-    * MPGEN_CLIENT_SECRET (your spotify client secret
-    * MPGEN_AUTH_TK (your spotify authentication token)
-    * MPGEN_REF_TK (your spotify refresh token)
+    python3 -m virtualenv venv
+    . venv/bin/activate
+    pip install .
 
-If you don't have these environment variables set correctly or you're not authorized to modify the playlist things won't work.
+To check that everything installed correctly you can run the unit tests:
+
+    python setup.py pytest
