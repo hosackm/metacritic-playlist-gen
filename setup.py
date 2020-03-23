@@ -11,11 +11,13 @@ setup(
         "boto3",
         "scrapy",
         "python-Levenshtein",
-        "fuzzywuzzy"
+        "fuzzywuzzy",
+        "pytest-runner"
     ],
     tests_require=[
         "pytest",
-        "requests_mock"
+        "requests_mock",
+        "bs4"
     ],
     entry_points="""
         [console_scripts]
