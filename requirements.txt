@@ -6,3 +6,4 @@ boto3
 scrapy
 python-Levenshtein
 fuzzywuzzy
+bs4
