@@ -12,13 +12,13 @@ setup(
         "scrapy",
         "python-Levenshtein",
         "fuzzywuzzy",
-	"bs4",
+        "bs4",
         "pytest-runner"
     ],
     tests_require=[
         "pytest",
         "requests_mock",
-	"freezegun"
+        "freezegun"
     ],
     entry_points="""
         [console_scripts]
