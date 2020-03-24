@@ -8,4 +8,4 @@ def spotify_lambda(e, ctx):
 
 def metacritic_lambda(e, ctx):
     print("Entered Metacritic lambda handler")
-    scrape()
+    scrape(s3_upload=True)

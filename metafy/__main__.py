@@ -13,7 +13,7 @@ from scrapy.crawler import CrawlerProcess
 
 from . import version
 from .spotify import Spotify
-from .metacritic import MetacriticSpider
+from .metacritic import gt_80_lt_1_week, parse, get_html, upload
 from .code import codeflow
 
 
@@ -73,19 +73,19 @@ def build_pkg(output):
 
 
 @cli.command()
-def scrape():
+@click.option("--s3-upload/--no-s3-upload", default=False)
+def scrape(s3_upload):
     click.echo("Scraping Metacritic new releases page")
 
-    settings = {
-        "ITEM_PIPELINES": {
-            'main.AlbumsPipeline': 300,
-        },
-        "AWS_SECRET_ACCESS_KEY": os.environ["KEY_ID"],
-        "AWS_ACCESS_KEY_ID": os.environ["SECRET_KEY"],
-    }
-    crawler = CrawlerProcess(settings)
-    crawler.crawl(MetacriticSpider)
-    crawler.start()
+    html = get_html()
+    albums = parse(html)
+    albums = list(filter(gt_80_lt_1_week, albums))
+
+    click.echo(f"Parsed: {albums}")
+
+    if s3_upload:
+        click.echo("Uploading to AWS S3 bucket")
+        upload(albums)
 
 
 @cli.command()

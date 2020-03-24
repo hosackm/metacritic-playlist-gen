@@ -7,3 +7,4 @@ scrapy
 python-Levenshtein
 fuzzywuzzy
 bs4
+freezegun
