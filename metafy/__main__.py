@@ -38,7 +38,7 @@ def copy_file_or_dir(src, dst):
 
 
 @cli.command()
-@click.option("--output", default="lambda_package.zip", help="filename of zip package")
+@click.option("--output", default="metafy.zip", help="filename of zip package")
 def build_pkg(output):
     """
     Package mpgen and dependent Python packages into zip for uploading to
@@ -69,7 +69,8 @@ def build_pkg(output):
             copy_file_or_dir(f, tmpdir)
 
         # zip everything up and remove tmp folder
-        shutil.make_archive("metafy", "zip", tmpdir)
+        base, _ = os.path.splitext(output)
+        shutil.make_archive(base, "zip", tmpdir)
 
 
 @cli.command()
