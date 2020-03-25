@@ -9,12 +9,10 @@ from datetime import datetime
 import click
 import boto3
 import json
-from scrapy.crawler import CrawlerProcess
 
 from . import version
-from .spotify import Spotify
-from .metacritic import gt_80_lt_1_week, parse, get_html, upload
 from .code import codeflow
+from .__lambdas__ import metacritic_lambda, spotify_lambda
 
 
 @click.group()
@@ -57,10 +55,9 @@ def build_pkg(output):
 
         # copy packages
         if "Windows" in platform.platform():
-            packages_glob = "venv/Lib/site-packages/*"
+            packages_glob = "venvdocker/Lib/site-packages/*"
         else:
-            mj, mn = sys.version_info[:2]
-            packages_glob = "venv/lib/python{0}.{1}/site-packages/*".format(mj, mn)
+            packages_glob = "venvdocker/lib*/python3.7/site-packages/*"
 
         for f in glob.glob(packages_glob):
             if "metafy" in f:
@@ -76,43 +73,14 @@ def build_pkg(output):
 @cli.command()
 @click.option("--s3-upload/--no-s3-upload", default=False)
 def scrape(s3_upload):
-    click.echo("Scraping Metacritic new releases page")
-
-    html = get_html()
-    albums = parse(html)
-    albums = list(filter(gt_80_lt_1_week, albums))
-
-    click.echo(f"Parsed: {albums}")
-
-    if s3_upload:
-        click.echo("Uploading to AWS S3 bucket")
-        upload(albums)
+    # only add s3-upload key if it's true
+    ctx = {"s3-upload": s3_upload} if s3_upload else {}
+    metacritic_lambda(None, ctx)
 
 
 @cli.command()
 def update_playlist():
-    click.echo("Updating Spotify new releases playlist")
-
-    api = Spotify(playlist_id="65RYrUbKJgX0eJHBIZ14Fe")
-    data = boto3.client("s3").get_object(Bucket="metacritic-releases", Key="albums.json")["Body"].read().decode("utf8")
-    albums = json.loads(data)
-
-    api.clear_playlist()
-    for album in albums:
-        query = "{} {}".format(album["album"], album["artist"])
-        hit = api.search_for_album(query)
-        if hit:
-            tracks = api.get_tracks_from_album(hit)
-            api.add_tracks_to_playlist(tracks)
-
-    description = ("(Updated {}).  "
-                   "This playlist was created using a script written by Matt Hosack.  The new "
-                   "release page from metacritic.com was scraped and albums realeased more"
-                   "recently than a week ago that scored higher than 80 were "
-                   "added to this playlist."
-                   "See github.com/hosackm/metacritic-playlist-gen for more info.".format(
-                       datetime.strftime(datetime.today(), "%b %d %Y")))
-    api.update_playlist_description(description)
+    spotify_lambda(None, {})
 
 
 @cli.command()

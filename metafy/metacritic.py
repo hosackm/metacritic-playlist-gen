@@ -27,12 +27,11 @@ def get_html(retries: int=3) -> bytes:
             print(f"Sleeping {t} seconds and retrying")
             time.sleep(t)
             get_html(retries=retries-1)
-        else:
-            raise Exception("Rate limitation exceeeded. Try again later.")
+        raise Exception("Rate limitation exceeeded. Try again later.")
     elif rsp.status_code == 403:
         raise Exception("HTML resource forbidden. Try different User-Agent in request header.")
     elif rsp.status_code != 200:
-        raise Exception("Unknown HTML error. Status code ({rsp.status_code})")
+        raise Exception("Unresolved HTTP error. Status code ({rsp.status_code})")
 
     return rsp.content
 

@@ -9,7 +9,6 @@ setup(
         "Click",
         "requests",
         "boto3",
-        "scrapy",
         "python-Levenshtein",
         "fuzzywuzzy",
         "bs4",

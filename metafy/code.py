@@ -15,7 +15,9 @@ def codeflow():
     url += "?client_id=1d250b7639af49efadbe82b1b675f189"
     url += "&response_type=code"
     url += "&redirect_uri=http:%2F%2Fexample.com"
-    url += "&scopes=%20playlist-read-private%20playlist-modify-public"
+    url += "%20".join(["&scope=playlist-read-private",
+                       "playlist-modify-public",
+                       "playlist-modify-private"])
 
     # visit the Spotify authorization website
     webbrowser.open(url)

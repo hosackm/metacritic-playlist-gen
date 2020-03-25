@@ -3,7 +3,6 @@ click
 requests
 requests_mock
 boto3
-scrapy
 python-Levenshtein
 fuzzywuzzy
 bs4
