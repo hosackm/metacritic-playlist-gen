@@ -1,7 +1,8 @@
 import os
 import json
-import boto3
 from datetime import datetime
+from io import BytesIO
+from boto3 import Session
 
 from .spotify import Spotify
 from .metacritic import get_html, parse, gt_80_lt_1_week, upload
@@ -10,11 +11,21 @@ from .metacritic import get_html, parse, gt_80_lt_1_week, upload
 def spotify_lambda(e, ctx):
     print("Updating Spotify new releases playlist")
 
+    bucket = os.environ["S3_BUCKET_NAME"]
+    object_name = os.environ["S3_OBJECT_NAME"]
+    region = os.environ["S3_BUCKET_REGION"]
+    secret_key = os.environ["SECRET_KEY"]
+    key_id = os.environ["KEY_ID"]
+
     api = Spotify(playlist_id="65RYrUbKJgX0eJHBIZ14Fe")
-    kw = {"Bucket": "metacritic-releases", "Key": "albums.json"}
-    body = boto3.client("s3").get_object(**kw)["Body"]
-    print("Got albums.json from s3")
-    albums = json.loads(body.read().decode("utf8"))
+
+    session = Session(aws_access_key_id=key_id, aws_secret_access_key=secret_key, region_name=region)
+    bucket = session.resource("s3").Bucket(bucket)
+
+    with BytesIO() as f:
+        bucket.download_fileobj(Key=object_name, Fileobj=f)
+        f.seek(0)
+        albums = json.loads(f.read().decode("utf8"))
 
     print("Clearing playlist")
     api.clear_playlist()
