@@ -2,6 +2,7 @@ import json
 import time
 import os
 import requests
+from random import choice
 
 from datetime import datetime as dt, timedelta as td
 from bs4 import BeautifulSoup
@@ -17,9 +18,18 @@ MONTH_DAY_FMT = "%b %d"
 MONTH_DAY_YEAR_FMT = "%b %d %Y"
 
 
+def acquire_user_agent():
+    "Return a User Agent that metacritic won't expect a scraper to use"
+    url = "https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome"
+    resp = requests.get(url)
+    return choice([a.text
+                   for a in BeautifulSoup(
+                       resp.content, "html.parser").select("span.code")])
+
+
 def get_html(retries: int=3) -> bytes:
-    "Return the HTML content from metacritic's new releases page "
-    rsp = requests.get(URL, headers={"User-Agent": f"mshosa-metafy-scraper-v{version}"})
+    "Return the HTML content from metacritic's new releases page"
+    rsp = requests.get(URL, headers={"User-Agent": f"{acquire_user_agent()}"})
 
     if rsp.status_code == 429:
         if retries > 0:
