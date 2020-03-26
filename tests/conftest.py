@@ -8,22 +8,13 @@ from unittest import mock
 from bs4 import BeautifulSoup as Soup
 
 from metafy.metacritic import parse, URL
-from metafy.spotify import Auth, Spotify
+from metafy.spotify import SpotifyAuth, Spotify
 
 
 RESOURCES = os.path.join(os.path.dirname(__file__), "resources")
 
 
 # Spotify fixtures
-
-@pytest.fixture
-def AuthEnv():
-    os.environ["SPOTIFY_CLIENT_ID"] = "TEST_CLIENT_ID"
-    os.environ["SPOTIFY_CLIENT_SECRET"] = "TEST_CLIENT_SECRET"
-    os.environ["SPOTIFY_REF_TK"] = "TEST_REF_TK"
-    return Auth()
-
-
 @pytest.fixture
 def RequestsMockedSpotifyAPI():
     with requests_mock.Mocker() as rm:
@@ -36,20 +27,24 @@ def RequestsMockedSpotifyAPI():
         rm.register_uri("GET",
                         re.compile("https://api.spotify.com/v1/search.*"),
                         json=json.load(open(os.path.join(RESOURCES, "search.json"))))
+        j = {"access_token": "YOURTOKEN", "expires_in": 3600}
+        rm.register_uri("POST", "https://accounts.spotify.com/api/token", json=j)
         yield rm
 
 
 @pytest.fixture
-def FakeAuth(AuthEnv):
-    auth = Auth()
-    with mock.patch("metafy.spotify.Auth.get_token_as_header") as authmock:
-        yield auth
+def AuthEnv(RequestsMockedSpotifyAPI):
+    os.environ["SPOTIFY_CLIENT_ID"] = "client_id"
+    os.environ["SPOTIFY_CLIENT_SECRET"] = "client_secret"
+    os.environ["SPOTIFY_REF_TK"] = "ref_token"
+    return SpotifyAuth(os.environ["SPOTIFY_CLIENT_ID"],
+                       os.environ["SPOTIFY_CLIENT_SECRET"],
+                       os.environ["SPOTIFY_REF_TK"])
 
 
 @pytest.fixture
-def MockedSpotifyAPI(FakeAuth, RequestsMockedSpotifyAPI):
+def MockedSpotifyAPI(AuthEnv, RequestsMockedSpotifyAPI):
     s = Spotify()
-    s.auth = FakeAuth
     yield s
 
 
