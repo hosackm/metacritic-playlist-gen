@@ -4,7 +4,7 @@ import requests
 import collections
 from datetime import datetime, timedelta
 from fuzzywuzzy import fuzz
-from base64 import b64encode
+from base64 import b64encode as b64e
 from urllib.parse import quote_plus as qp
 from typing import Dict, List, Optional
 
@@ -68,65 +68,37 @@ class SpotifyTrack:
         return "spotify:track:{}".format(self.track_id)
 
 
-class Auth:
+class SpotifyAuth(requests.auth.AuthBase):
     auth_url = "https://accounts.spotify.com/api/token"
 
-    def __init__(self, ref_tk: str=None):
-        self.client_id = os.environ["SPOTIFY_CLIENT_ID"]
-        self.client_secret = os.environ["SPOTIFY_CLIENT_SECRET"]
-        self.ref_tk = ref_tk or os.environ["SPOTIFY_REF_TK"]
-        self.token = None
-        self.token_expires = None
+    def __init__(self, client_id, client_secret, ref_tk):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.ref_tk = ref_tk
+        self.get_token()
 
-    def reauthorize(self):
-        """
-        Run through Spotify Authorization using the refresh token to acquire
-        a new authorization token.  This function returns the json response.
-        """
-        data = {
-            "grant_type": "refresh_token",
-            "refresh_token": self.ref_tk,
-        }
+    def get_token(self) -> None:
+        "Go through authorization workflow and store the token"
+        data = {"grant_type": "refresh_token", "refresh_token": self.ref_tk}
+        id_secret = b64e(f"{self.client_id}:{self.client_secret}".encode("utf8"))
+        headers = {"Authorization": f"Basic {id_secret.decode('utf8')}"}
 
-        # base64 encode client_id:client_secret for authorization POST
-        id_secret = "{}:{}".format(self.client_id, self.client_secret)
-        base64_id_secret = b64encode(id_secret.encode("utf8")).decode("utf8")
-        headers = {
-            "Authorization": "Basic {}".format(base64_id_secret)
-        }
-
-        # POST request and check that it was successful
+        # perform HTTP request using the refresh token and auth header
         resp = requests.post(self.auth_url, data=data, headers=headers)
         if resp.status_code != 200:
-            raise Exception("Unable to refresh auth token: {}".format(resp.json()))
+            raise Exception(f"Unable to refresh auth token: {resp.json()}")
 
-        # parse json response and store the token and expiration date
-        payload = resp.json()
-        self.token = payload.get("access_token")
-        self.token_expires = datetime.now() + timedelta(seconds=int(payload.get("expires_in")))
+        # get expiration date and token from the response JSON
+        j = resp.json()
+        self.token = j["access_token"]
+        self.expiration = datetime.now() + timedelta(int(j["expires_in"]))
 
-    def token_expired(self) -> bool:
-        """
-        Returns True if a token has expired or will expire in less than 10 seconds (just to be safe)
-        """
-        timeleft = self.token_expires - datetime.now()
-        return True if timeleft < timedelta(seconds=10) else False
+    def __call__(self, req) -> requests.Request:
+        if self.expiration - datetime.now() < timedelta(seconds=10):
+            self.get_token()
 
-    def get_token(self) -> str:
-        """
-        Try to get cached token or reauthorize
-        """
-        if self.token is None or self.token_expired():
-            self.reauthorize()
-
-        return self.token
-
-    def get_token_as_header(self) -> Dict:
-        """
-        Return authorization token as a request header
-        """
-        token = self.get_token()
-        return {"Authorization": "Bearer {}".format(token)}
+        req.headers["Authorization"] = f"Bearer {self.token}"
+        return req
 
 
 class Spotify:
@@ -134,7 +106,11 @@ class Spotify:
 
     def __init__(self,
                  playlist_id: str="65RYrUbKJgX0eJHBIZ14Fe"):
-        self.auth = Auth()
+        self.auth = SpotifyAuth(
+            os.environ["SPOTIFY_CLIENT_ID"],
+            os.environ["SPOTIFY_CLIENT_SECRET"],
+            os.environ["SPOTIFY_REF_TK"]
+        )
         self.playlist_id = playlist_id
 
     def clear_playlist(self) -> List[SpotifyTrack]:
@@ -154,7 +130,7 @@ class Spotify:
             self.urlbase, self.playlist_id)
         query = "?fields=items(track(name, id, artists(name)))"
 
-        resp = requests.get(url+query, headers=self.auth.get_token_as_header())
+        resp = requests.get(url+query, auth=self.auth)
         if resp.status_code != 200:
             raise Exception("Unable to get playlist tracks from Spotify API: {}".format(resp.json()))
 
@@ -174,7 +150,7 @@ class Spotify:
                                              self.playlist_id)
 
         # POST http request to API and ensure it returns 201
-        resp = requests.post(url, headers=self.auth.get_token_as_header(), data=json.dumps(data))
+        resp = requests.post(url, auth=self.auth, data=json.dumps(data))
         if resp.status_code != 201:
             raise Exception("Unable to add tracks to the playlist: {}".format(resp.json()))
 
@@ -191,9 +167,7 @@ class Spotify:
                                              self.playlist_id)
 
         # DELETE http request to delete the tracks and ensure 200 was returned
-        resp = requests.delete(url,
-                               headers=self.auth.get_token_as_header(),
-                               data=json.dumps(data))
+        resp = requests.delete(url, auth=self.auth, data=json.dumps(data))
         if resp.status_code != 200:
             raise Exception("Unable to delete tracks")
 
@@ -203,12 +177,12 @@ class Spotify:
         playlist in Spotify's web player
         """
         url = "{}playlists/{}".format(self.urlbase, self.playlist_id)
-        header = self.auth.get_token_as_header()
-        header["Content-Type"] = "application/json"
+        # header = self.auth.get_token_as_header()
+        header = {"Content-Type": "application/json"}
         data = json.dumps({"description": description})
 
         # PUT http request to update description of playlist
-        resp = requests.put(url, headers=header, data=data)
+        resp = requests.put(url, auth=self.auth, headers=header, data=data)
         if resp.status_code != 200:
             raise Exception("Unable to update playlist description: {}".format(resp.json()))
 
@@ -219,7 +193,7 @@ class Spotify:
         q = "q=album:{}&type=album".format(qp(album_query_string))
         url = "{}search?{}".format(self.urlbase, q)
 
-        resp = requests.get(url, headers=self.auth.get_token_as_header())
+        resp = requests.get(url, auth=self.auth)
         if resp.status_code != 200:
             raise Exception("Search request to API failed{}".format(resp.json()))
 
@@ -236,7 +210,7 @@ class Spotify:
         """
         url = "{}albums/{}/tracks".format(self.urlbase, album.album_id)
 
-        resp = requests.get(url, headers=self.auth.get_token_as_header())
+        resp = requests.get(url, auth=self.auth)
         if resp.status_code != 200:
             raise Exception("API Failed to retrieve tracks for album: {}".format(resp.json()))
 
