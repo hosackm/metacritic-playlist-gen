@@ -53,7 +53,7 @@ def metacritic_lambda(e, ctx):
     print("Entered Metacritic lambda handler")
 
     do_upload = False
-    if "s3-upload" in ctx or os.environ.get("EXECUTION_ENVIRONMENT") == "lambda":
+    if "s3-upload" in e or os.environ.get("EXECUTION_ENVIRONMENT") == "lambda":
         do_upload = True
 
     html = get_html()

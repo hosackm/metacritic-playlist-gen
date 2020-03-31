@@ -74,8 +74,8 @@ def build_pkg(output):
 @click.option("--s3-upload/--no-s3-upload", default=False)
 def scrape(s3_upload):
     # only add s3-upload key if it's true
-    ctx = {"s3-upload": s3_upload} if s3_upload else {}
-    metacritic_lambda(None, ctx)
+    ev = {"s3-upload": s3_upload} if s3_upload else {}
+    metacritic_lambda(ev, None)
 
 
 @cli.command()

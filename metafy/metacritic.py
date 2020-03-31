@@ -53,7 +53,12 @@ def deduce_and_replace_year(month_and_day: str) -> str:
     properly.
     """
     now = dt.now()
-    d = dt.strptime(month_and_day, MONTH_DAY_FMT).replace(year=now.year)
+    # can't create a datetime on a leap day without the correct year specified
+    # good thing I developed this on a leap year...
+    if month_and_day == "Feb 29":
+        d = dt(month=2, day=29, year=now.year)
+    else:
+        d = dt.strptime(month_and_day, MONTH_DAY_FMT).replace(year=now.year)
 
     # metacritic doesn't put old or futuristic albums on the front page.
     # I use 4 months as a threshold for "old/futuristic".
