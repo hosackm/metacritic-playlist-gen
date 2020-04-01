@@ -6,6 +6,14 @@ Description: >
   Serverless Application for deployment of the Metafy project.
 
 Parameters:
+  EnvType:
+    Description: Environment Type
+    Default: test
+    Type: String
+    AllowedValues:
+      - prod
+      - test
+    ConstraintDescription: Please choose either 'prod' or 'test'
   SpotifyClientID:
     Type: String
     Default: OVERRIDE_ME
@@ -36,6 +44,7 @@ Resources:
           SPOTIFY_CLIENT_ID: 1d250b7639af49efadbe82b1b675f189
           SPOTIFY_CLIENT_SECRET: 6d55b7ac6de34b62a4b66d9a48ffc9d3
           SPOTIFY_REF_TK: AQANDUB54QwihDSKnfY4RTnlVThVL8OCxYEcm6VOmFefKLzgXKElzQt0D83W5fjGuZKgcA9hLTkQe7suS7kASQSY8cnQ8Jjg3dGqzC9YaICkYhRzcqjvdfj75UCNcjCiFtg
+          ENVIRONMENT_TYPE: !Ref EnvType
       Events:
         Mondays:
           Type: Schedule
