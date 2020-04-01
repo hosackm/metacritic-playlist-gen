@@ -28,8 +28,8 @@ Parameters:
     Description: Override with Spotify Refresh Token
   SpotifyPlaylistID:
     Type: String
-    Default: OVERRIDE_ME
-    Description: Override with the Spotify URI of the Playlist you've authorized Metafy to modify
+    Default: 65RYrUbKJgX0eJHBIZ14Fe
+    Description: Spotify URI of the Playlist you've authorized Metafy to modify
 
 Resources:
   MetafyLambdaFunction:
@@ -41,6 +41,9 @@ Resources:
       Timeout: 20
       Environment:
         Variables:
+          SPOTIFY_CLIENT_ID: !Ref SpotifyClientID
+          SPOTIFY_CLIENT_SECRET: !Ref SpotifyClientSecret
+          SPOTIFY_REF_TK: !Ref SpotifyRefToken
           ENVIRONMENT_TYPE: !Ref EnvType
       Events:
         Mondays:
