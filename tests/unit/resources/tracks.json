@@ -1,0 +1,278 @@
+{
+  "href": "https://api.spotify.com/v1/users/hosackm/playlists/65RYrUbKJgX0eJHBIZ14Fe/tracks?offset=0&limit=3",
+  "items": [{
+    "added_at": "2017-08-07T08:00:51Z",
+    "added_by": {
+      "external_urls": {
+        "spotify": "http://open.spotify.com/user/hosackm"
+      },
+      "href": "https://api.spotify.com/v1/users/hosackm",
+      "id": "hosackm",
+      "type": "user",
+      "uri": "spotify:user:hosackm"
+    },
+    "is_local": false,
+    "track": {
+      "album": {
+        "album_type": "album",
+        "artists": [{
+          "external_urls": {
+            "spotify": "https://open.spotify.com/artist/3HQyFCFFfJO3KKBlUfZsyW"
+          },
+          "href": "https://api.spotify.com/v1/artists/3HQyFCFFfJO3KKBlUfZsyW",
+          "id": "3HQyFCFFfJO3KKBlUfZsyW",
+          "name": "Randy Newman",
+          "type": "artist",
+          "uri": "spotify:artist:3HQyFCFFfJO3KKBlUfZsyW"
+        }],
+        "available_markets": ["AD", "AR", "AT", "AU", "BE", "BG", "BO", "BR",
+                              "CA", "CH", "CL", "CO", "CR", "CY", "CZ", "DE",
+                              "DK", "DO", "EC", "EE", "ES", "FI", "FR", "GB",
+                              "GR", "GT", "HK", "HN", "HU", "ID", "IE", "IS",
+                              "IT", "JP", "LI", "LT", "LU", "LV", "MC", "MT",
+                              "MX", "MY", "NI", "NL", "NO", "NZ", "PA", "PE",
+                              "PH", "PL", "PT", "PY", "SE", "SG", "SK", "SV",
+                              "TR", "TW", "US", "UY"],
+        "external_urls": {
+          "spotify": "https://open.spotify.com/album/6Yu3m6c7tXFBQMeD42ccvu"
+        },
+        "href": "https://api.spotify.com/v1/albums/6Yu3m6c7tXFBQMeD42ccvu",
+        "id": "6Yu3m6c7tXFBQMeD42ccvu",
+        "images": [{
+          "height": 640,
+          "url": "https://i.scdn.co/image/5e0307d23f6c28e8f7cab5c1029ff5eb6afdd5ad",
+          "width": 640
+        }, {
+          "height": 300,
+          "url": "https://i.scdn.co/image/8506a18282c0e908493fe9a67cac20f0929f5a07",
+          "width": 300
+        }, {
+          "height": 64,
+          "url": "https://i.scdn.co/image/52fd86d51db95caaae71b4a0e176a52003d6c710",
+          "width": 64
+        }],
+        "name": "Dark Matter",
+        "type": "album",
+        "uri": "spotify:album:6Yu3m6c7tXFBQMeD42ccvu"
+      },
+      "artists": [{
+        "external_urls": {
+          "spotify": "https://open.spotify.com/artist/3HQyFCFFfJO3KKBlUfZsyW"
+        },
+        "href": "https://api.spotify.com/v1/artists/3HQyFCFFfJO3KKBlUfZsyW",
+        "id": "3HQyFCFFfJO3KKBlUfZsyW",
+        "name": "Randy Newman",
+        "type": "artist",
+        "uri": "spotify:artist:3HQyFCFFfJO3KKBlUfZsyW"
+      }],
+      "available_markets": ["AD", "AR", "AT", "AU", "BE", "BG", "BO", "BR", "CA",
+                            "CH", "CL", "CO", "CR", "CY", "CZ", "DE", "DK", "DO",
+                            "EC", "EE", "ES", "FI", "FR", "GB", "GR", "GT", "HK",
+                            "HN", "HU", "ID", "IE", "IS", "IT", "JP", "LI", "LT",
+                            "LU", "LV", "MC", "MT", "MX", "MY", "NI", "NL", "NO",
+                            "NZ", "PA", "PE", "PH", "PL", "PT", "PY", "SE", "SG",
+                            "SK", "SV", "TR", "TW", "US", "UY"],
+      "disc_number": 1,
+      "duration_ms": 489053,
+      "explicit": false,
+      "external_ids": {
+        "isrc": "USNO11600845"
+      },
+      "external_urls": {
+        "spotify": "https://open.spotify.com/track/5hbttdGGhvN9PUZDwgCk67"
+      },
+      "href": "https://api.spotify.com/v1/tracks/5hbttdGGhvN9PUZDwgCk67",
+      "id": "5hbttdGGhvN9PUZDwgCk67",
+      "name": "The Great Debate",
+      "popularity": 37,
+      "track_number": 1,
+      "type": "track",
+      "uri": "spotify:track:5hbttdGGhvN9PUZDwgCk67"
+    }
+  }, {
+    "added_at": "2017-08-07T08:00:51Z",
+    "added_by": {
+      "external_urls": {
+        "spotify": "http://open.spotify.com/user/hosackm"
+      },
+      "href": "https://api.spotify.com/v1/users/hosackm",
+      "id": "hosackm",
+      "type": "user",
+      "uri": "spotify:user:hosackm"
+    },
+    "is_local": false,
+    "track": {
+      "album": {
+        "album_type": "album",
+        "artists": [{
+          "external_urls": {
+            "spotify": "https://open.spotify.com/artist/3HQyFCFFfJO3KKBlUfZsyW"
+          },
+          "href": "https://api.spotify.com/v1/artists/3HQyFCFFfJO3KKBlUfZsyW",
+          "id": "3HQyFCFFfJO3KKBlUfZsyW",
+          "name": "Randy Newman",
+          "type": "artist",
+          "uri": "spotify:artist:3HQyFCFFfJO3KKBlUfZsyW"
+        }],
+        "available_markets": ["AD", "AR", "AT", "AU", "BE", "BG", "BO", "BR",
+                              "CA", "CH", "CL", "CO", "CR", "CY", "CZ", "DE",
+                              "DK", "DO", "EC", "EE", "ES", "FI", "FR", "GB",
+                              "GR", "GT", "HK", "HN", "HU", "ID", "IE", "IS",
+                              "IT", "JP", "LI", "LT", "LU", "LV", "MC", "MT",
+                              "MX", "MY", "NI", "NL", "NO", "NZ", "PA", "PE",
+                              "PH", "PL", "PT", "PY", "SE", "SG", "SK", "SV",
+                              "TR", "TW", "US", "UY"],
+        "external_urls": {
+          "spotify": "https://open.spotify.com/album/6Yu3m6c7tXFBQMeD42ccvu"
+        },
+        "href": "https://api.spotify.com/v1/albums/6Yu3m6c7tXFBQMeD42ccvu",
+        "id": "6Yu3m6c7tXFBQMeD42ccvu",
+        "images": [{
+          "height": 640,
+          "url": "https://i.scdn.co/image/5e0307d23f6c28e8f7cab5c1029ff5eb6afdd5ad",
+          "width": 640
+        }, {
+          "height": 300,
+          "url": "https://i.scdn.co/image/8506a18282c0e908493fe9a67cac20f0929f5a07",
+          "width": 300
+        }, {
+          "height": 64,
+          "url": "https://i.scdn.co/image/52fd86d51db95caaae71b4a0e176a52003d6c710",
+          "width": 64
+        }],
+        "name": "Dark Matter",
+        "type": "album",
+        "uri": "spotify:album:6Yu3m6c7tXFBQMeD42ccvu"
+      },
+      "artists": [{
+        "external_urls": {
+          "spotify": "https://open.spotify.com/artist/3HQyFCFFfJO3KKBlUfZsyW"
+        },
+        "href": "https://api.spotify.com/v1/artists/3HQyFCFFfJO3KKBlUfZsyW",
+        "id": "3HQyFCFFfJO3KKBlUfZsyW",
+        "name": "Randy Newman",
+        "type": "artist",
+        "uri": "spotify:artist:3HQyFCFFfJO3KKBlUfZsyW"
+      }],
+      "available_markets": ["AD", "AR", "AT", "AU", "BE", "BG", "BO", "BR",
+                            "CA", "CH", "CL", "CO", "CR", "CY", "CZ", "DE",
+                            "DK", "DO", "EC", "EE", "ES", "FI", "FR", "GB",
+                            "GR", "GT", "HK", "HN", "HU", "ID", "IE", "IS",
+                            "IT", "JP", "LI", "LT", "LU", "LV", "MC", "MT",
+                            "MX", "MY", "NI", "NL", "NO", "NZ", "PA", "PE",
+                            "PH", "PL", "PT", "PY", "SE", "SG", "SK", "SV",
+                            "TR", "TW", "US", "UY"],
+      "disc_number": 1,
+      "duration_ms": 294213,
+      "explicit": false,
+      "external_ids": {
+        "isrc": "USNO11600846"
+      },
+      "external_urls": {
+        "spotify": "https://open.spotify.com/track/7uc4eht56O5P1Yu45708cU"
+      },
+      "href": "https://api.spotify.com/v1/tracks/7uc4eht56O5P1Yu45708cU",
+      "id": "7uc4eht56O5P1Yu45708cU",
+      "name": "Brothers",
+      "popularity": 34,
+      "track_number": 2,
+      "type": "track",
+      "uri": "spotify:track:7uc4eht56O5P1Yu45708cU"
+    }
+  }, {
+    "added_at": "2017-08-07T08:00:51Z",
+    "added_by": {
+      "external_urls": {
+        "spotify": "http://open.spotify.com/user/hosackm"
+      },
+      "href": "https://api.spotify.com/v1/users/hosackm",
+      "id": "hosackm",
+      "type": "user",
+      "uri": "spotify:user:hosackm"
+    },
+    "is_local": false,
+    "track": {
+      "album": {
+        "album_type": "album",
+        "artists": [{
+          "external_urls": {
+            "spotify": "https://open.spotify.com/artist/3HQyFCFFfJO3KKBlUfZsyW"
+          },
+          "href": "https://api.spotify.com/v1/artists/3HQyFCFFfJO3KKBlUfZsyW",
+          "id": "3HQyFCFFfJO3KKBlUfZsyW",
+          "name": "Randy Newman",
+          "type": "artist",
+          "uri": "spotify:artist:3HQyFCFFfJO3KKBlUfZsyW"
+        }],
+        "available_markets": ["AD", "AR", "AT", "AU", "BE", "BG", "BO", "BR",
+                              "CA", "CH", "CL", "CO", "CR", "CY", "CZ", "DE",
+                              "DK", "DO", "EC", "EE", "ES", "FI", "FR", "GB",
+                              "GR", "GT", "HK", "HN", "HU", "ID", "IE", "IS",
+                              "IT", "JP", "LI", "LT", "LU", "LV", "MC", "MT",
+                              "MX", "MY", "NI", "NL", "NO", "NZ", "PA", "PE",
+                              "PH", "PL", "PT", "PY", "SE", "SG", "SK", "SV",
+                              "TR", "TW", "US", "UY"],
+        "external_urls": {
+          "spotify": "https://open.spotify.com/album/6Yu3m6c7tXFBQMeD42ccvu"
+        },
+        "href": "https://api.spotify.com/v1/albums/6Yu3m6c7tXFBQMeD42ccvu",
+        "id": "6Yu3m6c7tXFBQMeD42ccvu",
+        "images": [{
+          "height": 640,
+          "url": "https://i.scdn.co/image/5e0307d23f6c28e8f7cab5c1029ff5eb6afdd5ad",
+          "width": 640
+        }, {
+          "height": 300,
+          "url": "https://i.scdn.co/image/8506a18282c0e908493fe9a67cac20f0929f5a07",
+          "width": 300
+        }, {
+          "height": 64,
+          "url": "https://i.scdn.co/image/52fd86d51db95caaae71b4a0e176a52003d6c710",
+          "width": 64
+        }],
+        "name": "Dark Matter",
+        "type": "album",
+        "uri": "spotify:album:6Yu3m6c7tXFBQMeD42ccvu"
+      },
+      "artists": [{
+        "external_urls": {
+          "spotify": "https://open.spotify.com/artist/3HQyFCFFfJO3KKBlUfZsyW"
+        },
+        "href": "https://api.spotify.com/v1/artists/3HQyFCFFfJO3KKBlUfZsyW",
+        "id": "3HQyFCFFfJO3KKBlUfZsyW",
+        "name": "Randy Newman",
+        "type": "artist",
+        "uri": "spotify:artist:3HQyFCFFfJO3KKBlUfZsyW"
+      }],
+      "available_markets": ["AD", "AR", "AT", "AU", "BE", "BG", "BO", "BR",
+                            "CA", "CH", "CL", "CO", "CR", "CY", "CZ", "DE",
+                            "DK", "DO", "EC", "EE", "ES", "FI", "FR", "GB",
+                            "GR", "GT", "HK", "HN", "HU", "ID", "IE", "IS",
+                            "IT", "JP", "LI", "LT", "LU", "LV", "MC", "MT",
+                            "MX", "MY", "NI", "NL", "NO", "NZ", "PA", "PE",
+                            "PH", "PL", "PT", "PY", "SE", "SG", "SK", "SV",
+                            "TR", "TW", "US", "UY"],
+      "disc_number": 1,
+      "duration_ms": 224160,
+      "explicit": false,
+      "external_ids": {
+        "isrc": "USNO11600662"
+      },
+      "external_urls": {
+        "spotify": "https://open.spotify.com/track/5GGYsohgEd9xnTaLE9ChZA"
+      },
+      "href": "https://api.spotify.com/v1/tracks/5GGYsohgEd9xnTaLE9ChZA",
+      "id": "5GGYsohgEd9xnTaLE9ChZA",
+      "name": "Putin",
+      "popularity": 34,
+      "track_number": 3,
+      "type": "track",
+      "uri": "spotify:track:5GGYsohgEd9xnTaLE9ChZA"
+    }
+  }],
+  "limit": 3,
+  "next": "https://api.spotify.com/v1/users/hosackm/playlists/65RYrUbKJgX0eJHBIZ14Fe/tracks?offset=3&limit=3",
+  "offset": 0,
+  "previous": "null",
+  "total": 19
+}

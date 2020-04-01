@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  metafy-sam
+
+  Serverless Application for deployment of the Metafy project.
+
+Parameters:
+  SpotifyClientID:
+    Type: String
+    Default: OVERRIDE_ME
+    Description: Override with Spotify Client ID
+  SpotifyClientSecret:
+    Type: String
+    Default: OVERRIDE_ME
+    Description: Override with Spotify Client Secret
+  SpotifyRefToken:
+    Type: String
+    Default: OVERRIDE_ME
+    Description: Override with Spotify Refresh Token
+  SpotifyPlaylistID:
+    Type: String
+    Default: OVERRIDE_ME
+    Description: Override with the Spotify URI of the Playlist you've authorized Metafy to modify
+
+Resources:
+  MetafyLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: metafy/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Timeout: 20
+      Environment:
+        Variables:
+          SPOTIFY_CLIENT_ID: 1d250b7639af49efadbe82b1b675f189
+          SPOTIFY_CLIENT_SECRET: 6d55b7ac6de34b62a4b66d9a48ffc9d3
+          SPOTIFY_REF_TK: AQANDUB54QwihDSKnfY4RTnlVThVL8OCxYEcm6VOmFefKLzgXKElzQt0D83W5fjGuZKgcA9hLTkQe7suS7kASQSY8cnQ8Jjg3dGqzC9YaICkYhRzcqjvdfj75UCNcjCiFtg
+      Events:
+        Mondays:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 8 ? * MON *)
+            Name: EveryMondayAt8AM
+            Enabled: True
+
+Outputs:
+  MetafyLambdaFunction:
+    Description: "The ARN of the Metafy Lambda Function"
+    Value: !GetAtt MetafyLambdaFunction.Arn
