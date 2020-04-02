@@ -1,13 +1,11 @@
 import re
 import os
 import json
-import datetime
 import pytest
 import requests_mock
 from unittest import mock
-from bs4 import BeautifulSoup as Soup
 
-from metafy.metacritic import parse, URL
+from metafy.metacritic import MetacriticSource
 from metafy.spotify import SpotifyAuth, Spotify
 
 
@@ -74,16 +72,17 @@ def MakeAlbum():
 @pytest.fixture
 def ScrapedAlbums():
     with open(os.path.join(RESOURCES, "metacritic_sample.html")) as f:
-        yield parse(f.read())
+        m = MetacriticSource()
+        yield m.parse(f.read())
 
 
 @pytest.fixture
 def MetacriticFailingMock():
     with requests_mock.Mocker() as m:
-        m.register_uri("GET", URL, text="failed to retrieve HTML", status_code=400)
+        m.register_uri("GET", MetacriticSource.URL, text="failed to retrieve HTML", status_code=400)
 
 
 @pytest.fixture
 def MetacriticRateLimitMock():
     with requests_mock.Mocker() as m:
-        m.register_uri("GET", URL, text="rate limited", status_code=429, headers={"Retry-After": "5"})
+        m.register_uri("GET", MetacriticSource.URL, text="rate limited", status_code=429, headers={"Retry-After": "5"})

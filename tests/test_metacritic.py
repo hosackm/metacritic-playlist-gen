@@ -3,7 +3,7 @@ from datetime import datetime
 from freezegun import freeze_time
 from unittest.mock import MagicMock
 
-from metafy.metacritic import parse, gt_80_lt_1_week
+from metafy.metacritic import MetacriticSource, gt_80_lt_1_week
 
 
 def test_albums_parse_correctly_from_html(ScrapedAlbums):
@@ -30,12 +30,13 @@ def test_first_and_last_albums_have_correct_data(ScrapedAlbums):
 
 def test_tbd_score_correctly_returns_0(MakeAlbum):
     html = MakeAlbum(1, "Fake Title", "Jun 4", "Fake Album")
-    album = parse(html)
+    m = MetacriticSource()
+    album = m.parse(html)
 
     assert album[0]["score"] == 1
 
     html = MakeAlbum("tbd", "Fake Title", "Jun 4", "Fake Album")
-    album = parse(html)
+    album = m.parse(html)
 
     assert album[0]["score"] == 0
 
