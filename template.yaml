@@ -35,8 +35,8 @@ Resources:
   MetafyLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: metafy/
-      Handler: app.lambda_handler
+      CodeUri: .
+      Handler: metafy.app.lambda_handler
       Runtime: python3.7
       Timeout: 20
       Environment:

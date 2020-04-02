@@ -3,7 +3,7 @@ from datetime import datetime
 from freezegun import freeze_time
 from unittest.mock import MagicMock
 
-from metafy.app import parse, gt_80_lt_1_week
+from metafy.metacritic import parse, gt_80_lt_1_week
 
 
 def test_albums_parse_correctly_from_html(ScrapedAlbums):

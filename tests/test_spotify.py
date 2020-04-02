@@ -1,7 +1,7 @@
 import requests
 import os
 import datetime
-from metafy.app import SpotifyAuth, Spotify, SpotifyTrack, SpotifyAlbum
+from metafy.spotify import SpotifyAuth, Spotify, SpotifyTrack, SpotifyAlbum
 
 
 def test_spotify_get_tracks_playlist(MockedSpotifyAPI):

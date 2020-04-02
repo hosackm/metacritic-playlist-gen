@@ -7,7 +7,8 @@ import requests_mock
 from unittest import mock
 from bs4 import BeautifulSoup as Soup
 
-from metafy.app import parse, URL, SpotifyAuth, Spotify
+from metafy.metacritic import parse, URL
+from metafy.spotify import SpotifyAuth, Spotify
 
 
 RESOURCES = os.path.join(os.path.dirname(__file__), "resources")
