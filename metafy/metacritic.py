@@ -1,4 +1,5 @@
 import time
+import logging
 import requests
 from random import choice
 from datetime import datetime as dt, timedelta as td
@@ -10,6 +11,7 @@ from .albums import AlbumSource, Album
 
 
 MONTH_DAY_YEAR_FMT = "%b %d %Y"
+logger = logging.getLogger("metafy")
 
 
 def acquire_user_agent():
@@ -47,7 +49,7 @@ class MetacriticSource(AlbumSource):
         if rsp.status_code == 429:
             if retries > 0:
                 t = int(rsp.headers.get("Retry-After", 5))
-                print(f"Sleeping {t} seconds and retrying")
+                logger.info(f"Sleeping {t} seconds and retrying")
                 time.sleep(t)
                 self.get_html(retries=retries-1)
             raise Exception("Rate limitation exceeeded. Try again later.")

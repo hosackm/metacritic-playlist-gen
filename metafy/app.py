@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import datetime as dt
 from .scraper import Scraper
 from .metacritic import MetacriticSource
@@ -6,10 +7,13 @@ from .spotify import Spotify
 
 
 version = "0.1.1"
+logger = logging.getLogger("metafy")
+logger.setLevel(logging.DEBUG)
+logging.StreamHandler().setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 
 
 def lambda_handler(e, ctx):
-    print("Scraping metacritic")
+    logger.info("Scraping metacritic")
     env = os.environ
 
     if env["ENVIRONMENT_TYPE"] == "prod":
@@ -31,16 +35,16 @@ def lambda_handler(e, ctx):
     scraper.register_source(MetacriticSource())
 
     albums = list(scraper.scrape())
-    print("Clearing playlist")
+    logger.info("Clearing playlist")
     api.clear_playlist()
 
     for album in albums:
-        print(f"Processing: {album}")
+        logger.info(f"Processing: {album}")
         query = f"{album.title} {album.artist}"
-        print(f"Searching for: {query}")
+        logger.debug(f"Searching for: {query}")
         hit = api.search_for_album(query)
         if hit:
-            print(f"Found {query}. Adding to playlist")
+            logger.debug(f"Found {query}. Adding to playlist")
             tracks = api.get_tracks_from_album(hit)
             api.add_tracks_to_playlist(tracks)
 
