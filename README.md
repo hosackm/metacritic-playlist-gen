@@ -25,6 +25,11 @@ Take note of the following things:
 ### Create a Spotify Playlist
 Create a playlist in your Spotify player of choice.  Right-click (or share on your mobile device) and select the "Copy Spotify URI" option.  This will give you the unique code that references this playlist.
 
+### Get a Spotify API Token
+The `authorize.py` script will walk you through OAuth 2.0 flow so that you can get an API token from Spotify.  The script will open your default browser to Spotify's login page after you provide it with your Spotify app ID and secret.  After you enter your username and password to authorize your app you will be redirected to the URI that you provided to when you created the app.  After you copy this URL and paste it into your terminal the script will extract your code and exchange it for a token.  Run the script by typing and follow the prompts:
+
+    python3 metafy/authorize.py
+
 ## Installing and Building
 Installing and building Metafy is very simple.  Using the SAM command line tools you can build the application.  One of the dependencies requries being built directly in the Lambda container base image.  In order for the builld to succeed you must add the `use-container` option when building:
 
