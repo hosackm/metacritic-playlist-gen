@@ -6,6 +6,7 @@ import requests_mock
 from unittest import mock
 
 from metafy.metacritic import MetacriticSource, DetailedMetacriticSource
+from metafy.pitchfork import PitchforkSource
 from metafy.scraper import Scraper
 from metafy.spotify import SpotifyAuth, Spotify
 
@@ -114,3 +115,11 @@ def ScraperWithMetacriticDetailedSource(MetacriticRequestMock):
     s = Scraper()
     s.register_source(DetailedMetacriticSource())
     return s
+
+
+@pytest.fixture
+def PitchforkReq():
+    with requests_mock.Mocker() as rm:
+        with open(os.path.join(RESOURCES, "pitchfork.html")) as f:
+            rm.register_uri("GET", PitchforkSource.URL, text=f.read())
+        yield rm

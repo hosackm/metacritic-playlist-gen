@@ -1,15 +1,30 @@
 import os
 import logging
 from datetime import datetime as dt
+from collections import defaultdict
 from .scraper import Scraper
 from .metacritic import MetacriticSource
 from .spotify import Spotify
+from .pitchfork import PitchforkSource
 
 
 version = "0.1.1"
 logger = logging.getLogger("metafy")
 logger.setLevel(logging.DEBUG)
 logging.StreamHandler().setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+
+
+def remove_duplicates(albums):
+    table = dict()
+    for album in albums:
+        logger.info(f"album: {album}")
+        key = f"{album.title}:{album.artist}"
+        if key in table:
+            logging.debug(f"Removing duplicate album {album}")
+            continue
+        table[key] = album
+
+    return [v for _, v in table.items()]
 
 
 def lambda_handler(e, ctx):
@@ -33,15 +48,16 @@ def lambda_handler(e, ctx):
 
     scraper = Scraper()
     scraper.register_source(MetacriticSource())
+    scraper.register_source(PitchforkSource())
 
-    albums = list(scraper.scrape())
     logger.info("Clearing playlist")
     api.clear_playlist()
 
+    albums = remove_duplicates(list(scraper.scrape()))
     for album in albums:
         logger.info(f"Processing: {album}")
         query = f"{album.title} {album.artist}"
-        logger.debug(f"Searching for: {query}")
+        logger.debug(f"Searching for ({album.source}): {query}")
         hit = api.search_for_album(query)
         if hit:
             logger.debug(f"Found {query}. Adding to playlist")
