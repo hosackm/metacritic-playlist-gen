@@ -5,7 +5,7 @@ from freezegun import freeze_time
 from unittest.mock import MagicMock
 from typing import Generator
 
-from metafy.metacritic import MetacriticSource, gt_80_lt_1_week
+from metafy.metacritic import MetacriticSource, gt_80_lt_1_week, DetailedMetacriticSource
 
 
 def test_albums_parse_correctly_from_html(ScrapedAlbums):
@@ -81,4 +81,13 @@ def test_parse_yields_albums_from_generator(MetacriticRequestMock):
     # there are 9 albums in the test HTML that pass the >80 and less than a week old filter
     num_albums = 9
 
+    assert len(list(p)) == num_albums
+
+
+@freeze_time(f"2020-04-03")
+def test_metacritic_detailed_source_yeilds_8_albums(MetacriticRequestMock):
+    m = DetailedMetacriticSource()
+    p = m.gen_albums()
+
+    num_albums = 15
     assert len(list(p)) == num_albums

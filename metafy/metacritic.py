@@ -11,6 +11,7 @@ from .albums import AlbumSource, Album
 
 
 MONTH_DAY_YEAR_FMT = "%b %d %Y"
+FULL_MONTH_COMMA_DAY_YEAR_FMT = "%B %d, %Y"
 logger = logging.getLogger("metafy")
 
 
@@ -119,4 +120,63 @@ class MetacriticSource(AlbumSource):
     def gen_albums(self):
         for a in filter(gt_80_lt_1_week, self.parse(self.get_html())):
             yield Album(title=a["album"], artist=a["artist"], source=self.name,
-                        img="https://google.com/img.jpg", rating=a["score"], date=a["date"])
+                        img="https://via.placeholder.com/98", rating=a["score"], date=a["date"])
+
+
+class DetailedMetacriticSource(AlbumSource):
+    URL = "https://www.metacritic.com/browse/albums/release-date/new-releases/date?view=detailed"
+
+    def __init__(self):
+        super().__init__()
+        self.name = "Detailed Metacritic Source"
+
+    def get_html(self):
+        headers = {"User-Agent": acquire_user_agent()}
+        return requests.get(self.URL, headers=headers).content
+
+    def normalize_date(self, date: str) -> str:
+        """
+        Normalize a (Month Day, Year) date string into a (Month(abbrv) Day, Year) date string
+        """
+        date = dt.strptime(date, FULL_MONTH_COMMA_DAY_YEAR_FMT)
+        return dt.strftime(date, MONTH_DAY_YEAR_FMT)
+
+    def parse(self, text: bytes) -> List[Dict]:
+        "Parse out album information from the provided HTML string"
+        soup = BeautifulSoup(text, "html.parser")
+
+        # BeautifulSoup is unable to parse correctly so I've replaced it with an uglier version above.
+        # This CSS select query works in Chrome Devtools but not in BeautifulSoup...
+        # JS:
+        # let rows = document.querySelectorAll("div.body_wrap tr");
+        # BeautifulSoup equivalent:
+        # rows = soup.select("div.body_wrap tr")
+
+        body_wrap = [d for d in soup.find_all("div")
+                     if "class" in d.attrs and "body_wrap" in d.attrs["class"]][0]
+        rows = body_wrap.find_all("tr")
+
+        albums = []
+        for r in rows:
+            if r.text:
+                # get the image first
+                img = r.find("img")["src"]
+
+                # filter out whitespace only elements and strip whitespace off each element
+                score, title, artist, date, *_ = [t.strip() for t in filter(lambda x: x.strip(), r.text.split("\n"))]
+
+                # clean up values
+                artist = artist.replace("- ", "", 1)
+                try:
+                    score = int(score)
+                except ValueError:
+                    score = 0
+                date = self.normalize_date(date)
+
+                albums.append(dict(score=score, title=title, artist=artist, img=img, date=date))
+        return albums
+
+    def gen_albums(self):
+        for a in filter(gt_80_lt_1_week, self.parse(self.get_html())):
+            yield Album(title=a["title"], artist=a["artist"], source=self.name,
+                        img=a["img"], rating=a["score"], date=a["date"])
