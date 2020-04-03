@@ -116,7 +116,7 @@ class MetacriticSource(AlbumSource):
             } for p in soup.select("div.product_wrap")
         ]
 
-    def gen_albums(self) -> Generator[Album, None, None]:
+    def gen_albums(self):
         for a in filter(gt_80_lt_1_week, self.parse(self.get_html())):
             yield Album(title=a["album"], artist=a["artist"], source=self.name,
                         img="https://google.com/img.jpg", rating=a["score"], date=a["date"])

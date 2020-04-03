@@ -1,7 +1,9 @@
 import pytest
+import requests
 from datetime import datetime
 from freezegun import freeze_time
 from unittest.mock import MagicMock
+from typing import Generator
 
 from metafy.metacritic import MetacriticSource, gt_80_lt_1_week
 
@@ -69,3 +71,14 @@ def test_filtering_function():
 
     for t in bad:
         assert not gt_80_lt_1_week(t)
+
+
+@freeze_time(f"{datetime.now().year}-04-28")
+def test_parse_yields_albums_from_generator(MetacriticRequestMock):
+    m = MetacriticSource()
+    p = m.gen_albums()
+
+    # there are 9 albums in the test HTML that pass the >80 and less than a week old filter
+    num_albums = 9
+
+    assert len(list(p)) == num_albums

@@ -12,6 +12,5 @@ class Scraper:
 
     def scrape(self) -> Generator[Album, None, None]:
         for src in self.sources:
-            gen = src.gen_albums()
-            for a in gen:
+            for a in src.gen_albums():
                 yield a

@@ -6,6 +6,7 @@ import requests_mock
 from unittest import mock
 
 from metafy.metacritic import MetacriticSource
+from metafy.scraper import Scraper
 from metafy.spotify import SpotifyAuth, Spotify
 
 
@@ -86,3 +87,21 @@ def MetacriticFailingMock():
 def MetacriticRateLimitMock():
     with requests_mock.Mocker() as m:
         m.register_uri("GET", MetacriticSource.URL, text="rate limited", status_code=429, headers={"Retry-After": "5"})
+
+
+@pytest.fixture
+def MetacriticRequestMock():
+    with requests_mock.Mocker() as rm:
+        with open(os.path.join(RESOURCES, "metacritic_sample.html")) as f:
+            rm.register_uri("GET", MetacriticSource.URL, text=f.read())
+            rm.register_uri("GET",
+                            "https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome",
+                            text="<span class='code'>some-agent</span>")
+        yield rm
+
+
+@pytest.fixture
+def ScraperWithMetacriticSource(MetacriticRequestMock):
+    s = Scraper()
+    s.register_source(MetacriticSource())
+    return s
