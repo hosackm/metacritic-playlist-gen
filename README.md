@@ -1,4 +1,4 @@
-# Metafy
+# Metafy [![Build Status](https://travis-ci.com/hosackm/metafy.svg?branch=master)](https://travis-ci.com/hosackm/metafy)
 Metafy is an application written in Python that will create a [Spotify playlist](https://open.spotify.com/playlist/65RYrUbKJgX0eJHBIZ14Fe?si=-TBJlxIFQtGiU0dT45Mxqw) of albums that were highly rated on Metacritic.  It does this by using AWS's Serverless Application Model (SAM) to deploy a Lambda Function in the cloud that scrapes Metacritic's [*New Releases*](https://www.metacritic.com/browse/albums/release-date/new-releases/date) page and reads their scores.  In order to deploy it yourself, you'll need an AWS account and a Spotify premium account for manipulating playlists using Spotify's API.
 
 ## Prerequisites
