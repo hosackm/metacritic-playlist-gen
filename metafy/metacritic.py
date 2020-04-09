@@ -31,7 +31,7 @@ def gt_80_lt_1_week(album: Dict) -> bool:
     date = dt.strptime(album["date"], MONTH_DAY_YEAR_FMT)
 
     # older than now, newer than a week ago, and gte to 80
-    if date <= now and date >= weekago and album["score"] >= 80:
+    if date <= now and date >= weekago and album["rating"] >= 80:
         return True
     return False
 
@@ -111,16 +111,17 @@ class MetacriticSource(AlbumSource):
         return [
             {
                 "date": self.strip_select_as_type(p, "li.release_date", dt),
-                "score": self.strip_select_as_type(p, "div.metascore_w", int),
-                "album": self.strip_select_as_type(p, "div.product_title > a"),
+                "rating": self.strip_select_as_type(p, "div.metascore_w", int),
+                "title": self.strip_select_as_type(p, "div.product_title > a"),
                 "artist": self.strip_select_as_type(p, "li.product_artist > span.data")
             } for p in soup.select("div.product_wrap")
         ]
 
     def gen_albums(self):
         for a in filter(gt_80_lt_1_week, self.parse(self.get_html())):
-            yield Album(title=a["album"], artist=a["artist"], source=self.name,
-                        img="https://via.placeholder.com/98", rating=a["score"], date=a["date"])
+            yield Album(**a, source=self.name, img="https://via.placeholder.com/98")
+            # yield Album(title=a["title"], artist=a["artist"], source=self.name,
+            #             img="https://via.placeholder.com/98", rating=a["rating"], date=a["date"])
 
 
 class DetailedMetacriticSource(AlbumSource):
@@ -163,20 +164,21 @@ class DetailedMetacriticSource(AlbumSource):
                 img = r.find("img")["src"]
 
                 # filter out whitespace only elements and strip whitespace off each element
-                score, title, artist, date, *_ = [t.strip() for t in filter(lambda x: x.strip(), r.text.split("\n"))]
+                rating, title, artist, date, *_ = [t.strip() for t in filter(lambda x: x.strip(), r.text.split("\n"))]
 
                 # clean up values
                 artist = artist.replace("- ", "", 1)
                 try:
-                    score = int(score)
+                    rating = int(rating)
                 except ValueError:
-                    score = 0
+                    rating = 0
                 date = self.normalize_date(date)
 
-                albums.append(dict(score=score, title=title, artist=artist, img=img, date=date))
+                albums.append(dict(rating=rating, title=title, artist=artist, img=img, date=date))
         return albums
 
     def gen_albums(self):
         for a in filter(gt_80_lt_1_week, self.parse(self.get_html())):
-            yield Album(title=a["title"], artist=a["artist"], source=self.name,
-                        img=a["img"], rating=a["score"], date=a["date"])
+            yield Album(**a, source=self.name)
+            # yield Album(title=a["title"], artist=a["artist"], source=self.name,
+            #             img=a["img"], rating=a["score"], date=a["date"])
