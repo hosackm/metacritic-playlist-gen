@@ -31,8 +31,10 @@ def lambda_handler(e, ctx):
     logger.info("Scraping metacritic")
     env = os.environ
 
+    logger.debug(f"Launched with environment:\n{env}")
+
     if env["ENVIRONMENT_TYPE"] == "prod":
-        api = Spotify(env["SpotifyPlaylistID"])
+        api = Spotify(env["SPOTIFY_PLAYLIST_ID"])
     else:
         class MockSpotify:
             def clear_playlist(self): pass

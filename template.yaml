@@ -44,6 +44,7 @@ Resources:
           SPOTIFY_CLIENT_ID: !Ref SpotifyClientID
           SPOTIFY_CLIENT_SECRET: !Ref SpotifyClientSecret
           SPOTIFY_REF_TK: !Ref SpotifyRefToken
+          SPOTIFY_PLAYLIST_ID: !Ref SpotifyPlaylistID
           ENVIRONMENT_TYPE: !Ref EnvType
       Events:
         Mondays:
